@@ -18,25 +18,45 @@ export class BasePage extends React.Component {
 
     this.state = {
       synth: this.synth,
-      activeSynth: 'none'
+      activeSynth: 'none',
+      synthParams: {
+        pluckSynth: {
+          synthVolume: -3,
+          attackNoise: 1,
+          dampening: 4000,
+          resonance: 0.7
+        }
+      }
     }
   }
 
-  synthUpdate = (e) => {
+  synthUpdate = (updates) => {
 
     switch (this.state.activeSynth) {
       case 'pluckSynth':
+
+        this.setState({ 
+          synthParams: {
+            ...this.state.synthParams,
+            pluckSynth: {
+              ...this.state.synthParams.pluckSynth,
+              ...updates
+            }
+          }
+        });
+        
         let synth = this.state.synth;
 
-        synth.volume.value = e.synthVolume;
-        synth.attackNoise = e.attackNoise;
-        synth.dampening.value = e.dampening;
-        synth.resonance.value = e.resonance;
+        synth.volume.value = this.state.synthParams.pluckSynth.synthVolume;
+        synth.attackNoise = this.state.synthParams.pluckSynth.attackNoise;
+        synth.dampening.value = this.state.synthParams.pluckSynth.dampening;
+        synth.resonance.value = this.state.synthParams.pluckSynth.resonance;
+
         this.setState({ synth });
 
         break;
-        default:
-          break;
+      default:
+        break;
     }
   }
 
@@ -120,22 +140,15 @@ export class BasePage extends React.Component {
     }
   }
 
-  synthDefaults = {
-    pluckSynth: {
-      synthVolume: -3,
-      attackNoise: 1,
-      dampening: 4000,
-      resonance: 0.7
-    }
-  }
+  
 
   render() {
     return (
       <div className="App">
-        <Container fluid={true}>
-          <Row>
+        <Container style={{ 'padding': '0' }}fluid={true}>
+          <Row noGutters={true}>
             <Col >
-              <SynthLayout defaults={this.synthDefaults} activeSynth={this.state.activeSynth} synthUpdate={this.synthUpdate} synthChange={this.synthChange} />
+              <SynthLayout synthParams={this.state.synthParams} activeSynth={this.state.activeSynth} synthUpdate={this.synthUpdate} synthChange={this.synthChange} />
             </Col>
             <Col >
               <FxContainer />

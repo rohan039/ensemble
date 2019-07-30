@@ -1,12 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { PluckSynth } from './synths/PluckSynth';
-// import { DropdownButton, Dropdown } from 'react-bootstrap';
+import PluckSynth from './synths/PluckSynth';
 import { Select } from 'react-nexusui';
-// import { googleLogin } from '../actions/auth';
-// import { Button, Form, Icon, Segment, Divider, Label } from 'semantic-ui-react';
-// import { isEmail } from 'validator';
-// import { firebase } from '../firebase/firebase';
 
 export class SynthLayout extends React.Component {
 
@@ -30,20 +25,8 @@ export class SynthLayout extends React.Component {
     }
   }
 
-  // handleSelect = (e) => {
-    
-  //       this.props.synthChange('basicSynth');
-      
-  // }
-
-  pluckUpdate = (e) => {
-
-    this.props.synthUpdate({
-      synthVolume: e.synthVolume,
-      attackNoise: e.attackNoise,
-      dampening: e.dampening,
-      resonance: e.resonance,
-    });
+  pluckUpdate = (updates) => {    
+    this.props.synthUpdate(updates);
   }
 
   render() {
@@ -51,7 +34,7 @@ export class SynthLayout extends React.Component {
     let selectedSynth = null;
     switch (this.props.activeSynth) {
       case 'pluckSynth':
-        selectedSynth = <PluckSynth defaults={this.props.defaults.pluckSynth} onChange={this.pluckUpdate} />
+        selectedSynth = <PluckSynth synthParams={this.props.synthParams.pluckSynth} onChange={this.pluckUpdate} />
         break;
       case 'AMSynth':
         selectedSynth = <p>AM</p>
@@ -77,9 +60,6 @@ export class SynthLayout extends React.Component {
       case 'basicSynth':
         selectedSynth = <p>basicSynth</p>
         break;
-      case 'none':
-        selectedSynth = <p>None selected</p>
-        break;
       default:
         selectedSynth = <p>None selected</p>
         break;
@@ -87,9 +67,8 @@ export class SynthLayout extends React.Component {
 
     return (
       <div style={{ 'background': '#84a5db' }}>
-        Synth Controller
+        <h3>Synth Controller</h3>
         <Select options={this.synthOptions} onChange={this.props.synthChange} />
-
         {selectedSynth}
 
       </div>

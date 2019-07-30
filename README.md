@@ -1,3 +1,19 @@
+## TODO
+
+- Effects chaining
+- MIDI input
+- Keyboard Controls
+- Layout improvements
+- Synth Styling
+- Piano UI
+  - Sequencer with next playable notes?
+- Musical Feeling indicator?
+
+- Node Server
+  - Websocket sync
+  - Tenserflow-js keras import
+  - Musical guidance
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
