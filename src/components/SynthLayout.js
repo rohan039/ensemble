@@ -1,86 +1,102 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import PluckSynth from './synths/PluckSynth';
+// import { connect } from 'react-redux';
 import { Select } from 'react-nexusui';
+import { Form } from 'react-bootstrap';
+import PluckSynth from './synths/PluckSynth';
+import AMSynth from './synths/AMSynth';
+import DuoSynth from './synths/DuoSynth';
+import FMSynth from './synths/FMSynth';
+import MembraneSynth from './synths/MembraneSynth';
+import MetalSynth from './synths/MetalSynth';
+import MonoSynth from './synths/MonoSynth';
+import NoiseSynth from './synths/NoiseSynth';
+import BasicSynth from './synths/BasicSynth';
 
-export class SynthLayout extends React.Component {
 
-  constructor(props) {
-    super(props);
 
-    this.synthOptions = [
-      'AM Synth',
-      'Duo Synth',
-      'FM Synth',
-      'Membrane Synth',
-      'Metal Synth',
-      'Mono Synth',
-      'Noise Synth',
-      'Pluck Synth',
-      'Generic Synth'
-    ];
+const SynthLayout = (props) => {
 
-    this.state = {
-      activeSynth: 'none',
-    }
+  const synthOptions = [
+    'Choose',
+    'AM Synth',
+    'Duo Synth',
+    'FM Synth',
+    'Membrane Synth',
+    'Metal Synth',
+    'Mono Synth',
+    'Noise Synth',
+    'Pluck Synth',
+    'Generic Synth'
+  ];
+
+  const pluckUpdate = (updates) => {
+    props.synthUpdate(updates);
   }
 
-  pluckUpdate = (updates) => {    
-    this.props.synthUpdate(updates);
+  let selectedSynth = null;
+  switch (props.activeSynth) {
+    case 'pluckSynth':
+      selectedSynth = <PluckSynth synthParams={props.synthParams.pluckSynth} onChange={pluckUpdate} />
+      break;
+    case 'AMSynth':
+      selectedSynth = <AMSynth />
+      break;
+    case 'duoSynth':
+      selectedSynth = <DuoSynth />
+      break;
+    case 'FMSynth':
+      selectedSynth = <FMSynth />
+      break;
+    case 'membraneSynth':
+      selectedSynth = <MembraneSynth />
+      break;
+    case 'metalSynth':
+      selectedSynth = <MetalSynth />
+      break;
+    case 'monoSynth':
+      selectedSynth = <MonoSynth />
+      break;
+    case 'noiseSynth':
+      selectedSynth = <NoiseSynth />
+      break;
+    case 'genericSynth':
+      selectedSynth = <BasicSynth />
+      break;
+    default:
+      selectedSynth = <p>None selected</p>
+      break;
   }
 
-  render() {
+  return (
+    <div style={{ 'background': '#84a5db' }}>
+      <h3>Synth Controller</h3>
+      
+      <Form.Group controlId="formControlsSelect">
+        
+        <Form.Control
+          as='select'
+          onChange={props.synthChange}
+        >
+          <option value='AMSynth'>AM Synth</option>
+          <option value='duoSynth'>Duo Synth</option>
+          <option value='FMSynth'>FM Synth</option>
+          <option value='membraneSynth'>Membrane Synth</option>
+          <option value='metalSynth'>Metal Synth</option>
+          <option value='monoSynth'>Mono Synth</option>
+          <option value='noiseSynth'>Noise Synth</option>
+          <option value='pluckSynth'>Pluck Synth</option>
+          <option value='genericSynth'>Generic Synth</option>
+        </Form.Control>
+      </Form.Group>
+      
+      {selectedSynth}
 
-    let selectedSynth = null;
-    switch (this.props.activeSynth) {
-      case 'pluckSynth':
-        selectedSynth = <PluckSynth synthParams={this.props.synthParams.pluckSynth} onChange={this.pluckUpdate} />
-        break;
-      case 'AMSynth':
-        selectedSynth = <p>AM</p>
-        break;
-      case 'duoSynth':
-        selectedSynth = <p>duoSynth</p>
-        break;
-      case 'FMSynth':
-        selectedSynth = <p>FMSynth</p>
-        break;
-      case 'membraneSynth':
-        selectedSynth = <p>membraneSynth</p>
-        break;
-      case 'metalSynth':
-        selectedSynth = <p>metalSynth</p>
-        break;
-      case 'monoSynth':
-        selectedSynth = <p>monoSynth</p>
-        break;
-      case 'noiseSynth':
-        selectedSynth = <p>noiseSynth</p>
-        break;
-      case 'basicSynth':
-        selectedSynth = <p>basicSynth</p>
-        break;
-      default:
-        selectedSynth = <p>None selected</p>
-        break;
-    }
-
-    return (
-      <div style={{ 'background': '#84a5db' }}>
-        <h3>Synth Controller</h3>
-        <Select options={this.synthOptions} onChange={this.props.synthChange} />
-        {selectedSynth}
-
-      </div>
-    )
-  }
+    </div>
+  )
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  // googleLogin: () => dispatch(googleLogin())
-});
 
-export default connect(undefined, mapDispatchToProps)(SynthLayout);
+export default SynthLayout;
 
 
 

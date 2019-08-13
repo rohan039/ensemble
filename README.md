@@ -8,12 +8,14 @@
 - Piano UI
   - Sequencer with next playable notes?
 - Musical Feeling indicator?
+- Master Volume level
 
 - Node Server
   - Websocket sync
   - Tenserflow-js keras import
   - Musical guidance
 
+knob from 808
 ___
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

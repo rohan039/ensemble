@@ -1,7 +1,7 @@
 import React from 'react';
 import { Number } from 'react-nexusui';
 import { Container, Col, Row } from 'react-bootstrap';
-import Knob from '../Knob'
+import Knob from '../ui-controllers/Knob'
 import '../../css/synth-base.css'
 
 const PluckSynth = (props) => {
@@ -22,14 +22,17 @@ const PluckSynth = (props) => {
     props.onChange({ resonance });
   }
 
+  const divStyle = { 'background': 'grey', 'color': 'white' };
+  const h3Style = { 'padding': '0.5em' }
+
   return (
-    <div style={{ 'background': 'grey', 'color': 'white' }}>
-      <h3 style={{ 'padding': '0.5em' }} >Pluck Synth</h3>
+    <div style={divStyle}>
+      <h3 style={h3Style} >Pluck Synth</h3>
       <Container>
         <Row noGutters={true}>
           <Col>
             <Knob
-              className='knob-group'
+              
               size={40}
               numTicks={20}
               degrees={340}
@@ -39,7 +42,7 @@ const PluckSynth = (props) => {
               onChange={volChange}
             />
             <Number
-              className={'knob-group'}
+              
               value={props.synthParams.synthVolume}
               min={-50}
               max={0}
@@ -97,7 +100,7 @@ const PluckSynth = (props) => {
               numTicks={20}
               degrees={340}
               min={0}
-              max={15000}
+              max={100}
               value={props.synthParams.resonance}
               onChange={resonanceChange}
             />
@@ -105,9 +108,10 @@ const PluckSynth = (props) => {
               className={'knob-group'}
               value={props.synthParams.resonance}
               min={0}
-              max={15000}
+              max={100}
               onChange={resonanceChange}
               size={[50, 20]}
+              step={0.1}
             />
             <p>Resonance</p>
           </Col>

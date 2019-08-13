@@ -1,24 +1,34 @@
 import React from 'react';
 // import { NavLink } from 'react-router-dom';
 // import { TextButton, Dial } from 'react-nexusui';
-import { Container, Row, Col } from 'react-bootstrap';
-import PianoLayout from './PianoLayout';
-import { SynthLayout } from './SynthLayout';
-import { FxContainer } from './FxContainer';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import * as Tone from 'tone';
+import AudioKeys from 'audiokeys';
+import PianoLayout from './PianoLayout';
+import SynthLayout from './SynthLayout';
+import { FxContainer } from './FxContainer';
+
+import InfoDisplay from './InfoDisplay';
 
 export class BasePage extends React.Component {
 
   constructor(props) {
     super(props);
 
-    this.synth = new Tone.Synth().toMaster()
+    this.synth = new Tone.PolySynth(8, Tone['Synth']).toMaster();
 
-    this.pluckSynth = new Tone.PluckSynth().toMaster();
+    this.keyboard = new AudioKeys({
+      polyphony: 8,
+      rows: 1,
+      priority: "last"
+    });
+
+    this.muted = false;
 
     this.state = {
       synth: this.synth,
-      activeSynth: 'none',
+      poly: true,
+      activeSynth: 'genericSynth',
       synthParams: {
         pluckSynth: {
           synthVolume: -3,
@@ -30,12 +40,21 @@ export class BasePage extends React.Component {
     }
   }
 
+  // playNote = (value) => {
+  //   if (value[0] === 144 && value[2] != 0) {
+  //     piano.toggleKey(Tone.Frequency(value[1], "midi").toMidi(), true);
+  //   } else if (value[0] === 144 || value[0] === 128) {
+  //     piano.toggleKey(Tone.Frequency(value[1], "midi").toMidi(), false);
+  //   }
+  // }
+
+
   synthUpdate = (updates) => {
 
     switch (this.state.activeSynth) {
       case 'pluckSynth':
 
-        this.setState({ 
+        this.setState({
           synthParams: {
             ...this.state.synthParams,
             pluckSynth: {
@@ -44,7 +63,7 @@ export class BasePage extends React.Component {
             }
           }
         });
-        
+
         let synth = this.state.synth;
 
         synth.volume.value = this.state.synthParams.pluckSynth.synthVolume;
@@ -55,97 +74,158 @@ export class BasePage extends React.Component {
         this.setState({ synth });
 
         break;
+      case 'genericSynth':
+
+        // this.setState({
+        //   synthParams: {
+        //     ...this.state.synthParams,
+        //     genericSynth: {
+        //       ...this.state.synthParams.genericSynth,
+        //       ...updates
+        //     }
+        //   }
+        // });
+
+        // let synth = this.state.synth;
+
+        // synth.volume.value = this.state.synthParams.genericSynth.synthVolume;
+
+        // // ToneAmplitudeEvnelope
+        // synth.envelope = 
+
+        // this.setState({ synth });
+
+        break;
       default:
         break;
     }
   }
 
   synthChange = (e) => {
+
+    let xOff = window.pageXOffset;
+    let yOff = window.pageYOffset
+
+    this.blurAll();
+    window.scrollTo(xOff, yOff);
+    console.log(e.target.value)
+
     let synth = null;
-    switch (e.value) {
-      case 'AM Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
-        synth = new Tone.AMSynth();
-        this.setState({ synth, activeSynth: 'AMSynth' });
+
+    if (this.state.synth) {
+      this.state.synth.disconnect();
+      this.state.synth.dispose();
+    }
+    switch (e.target.value) {
+      case 'AMSynth':
+
+        synth = new Tone.PolySynth(8, Tone["AMSynth"]).toMaster();
+        this.setState({ synth, activeSynth: 'AMSynth', poly: true });
         break;
-      case 'Duo Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
-        synth = new Tone.DuoSynth().toMaster();
-        this.setState({ synth, activeSynth: 'duoSynth' });
+      case 'duoSynth':
+        synth = new Tone.PolySynth(8, Tone["DuoSynth"]).toMaster();
+        this.setState({ synth, activeSynth: 'duoSynth', poly: true });
         break;
-      case 'FM Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
-        synth = new Tone.FMSynth().toMaster();
-        this.setState({ synth, activeSynth: 'FMSynth' });
+      case 'FMSynth':
+        synth = new Tone.PolySynth(8, Tone["FMSynth"]).toMaster();
+        this.setState({ synth, activeSynth: 'FMSynth', poly: true });
         break;
-      case 'Membrane Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
+      case 'membraneSynth':
         synth = new Tone.MembraneSynth().toMaster();
-        this.setState({ synth, activeSynth: 'membraneSynth' });
+        this.setState({ synth, activeSynth: 'membraneSynth', poly: false });
         break;
-      case 'Metal Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
+      case 'metalSynth':
         synth = new Tone.MetalSynth().toMaster();
-        this.setState({ synth, activeSynth: 'metalSynth' });
+        this.setState({ synth, activeSynth: 'metalSynth', poly: false });
         break;
-      case 'Mono Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
-        synth = new Tone.MonoSynth().toMaster();
-        this.setState({ synth, activeSynth: 'monoSynth' });
+      case 'monoSynth':
+        synth = new Tone.PolySynth(8, Tone["MonoSynth"]).toMaster();
+        this.setState({ synth, activeSynth: 'monoSynth', poly: true });
         break;
-      case 'Noise Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
+      case 'noiseSynth':
         synth = new Tone.NoiseSynth().toMaster();
-        this.setState({ synth, activeSynth: 'noiseSynth' });
+        this.setState({ synth, activeSynth: 'noiseSynth', poly: false });
         break;
-      case 'Pluck Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
+      case 'pluckSynth':
         synth = new Tone.PluckSynth().toMaster();
-        this.setState({ synth, activeSynth: 'pluckSynth' });
+        this.setState({ synth, activeSynth: 'pluckSynth', poly: false });
         break;
-      case 'Generic Synth':
-        if (this.state.synth) {
-          this.state.synth.disconnect();
-          this.state.synth.dispose();
-        }
-        synth = new Tone.Synth().toMaster();
-        this.setState({ activeSynth: 'basicSynth' });
+      case 'genericSynth':
+        synth = new Tone.PolySynth(8, Tone["Synth"]).toMaster();
+
+        console.log(synth.voices);
+        
+        this.setState({ synth, activeSynth: 'genericSynth', poly: true });
         break;
       default:
+        synth = null;
+        this.setState({ synth, activeSynth: 'none' });
         break;
     }
   }
 
-  
+  initPiano = (piano) => {
+
+    // piano.colorize("accent", "#a3ffbc");
+    // piano.colorize("fill", "#a3ffbc");
+
+    this.piano = piano;
+    this.piano.on("change", v => {
+
+      if (v.state && this.state.synth) {
+
+        if (this.state.activeSynth === "metalSynth" ||
+          this.state.activeSynth == "noiseSynth"
+        ) {
+          this.state.synth.triggerAttack();
+        } else {
+          this.state.synth.triggerAttack(Tone.Frequency(v.note, "midi").toNote());
+        }
+
+      } else if (this.state.synth && this.state.poly) {
+        this.state.synth.triggerRelease(Tone.Frequency(v.note, "midi").toNote());
+      } else {
+        this.state.synth.triggerRelease();
+      }
+    });
+
+    this.keyboard.down(note => {
+      if (note.note >= 0 && note.note <= 120) {
+        this.piano.toggleKey(note.note, true);
+      }
+    });
+
+    this.keyboard.up(note => {
+      if (note.note >= 0 && note.note <= 120) {
+        this.piano.toggleKey(note.note, false);
+      }
+    });
+
+  }
+
+  mute = (e) => {
+    if (this.muted) {
+      Tone.Master.mute = false;
+      this.muted = false;
+    } else {
+      this.muted = true;
+      Tone.Master.mute = true;
+    }
+
+  }
+
+  blurAll() {
+    var tmp = document.createElement("input");
+    document.body.appendChild(tmp);
+    tmp.focus();
+    document.body.removeChild(tmp);
+  }
 
   render() {
     return (
       <div className="App">
-        <Container style={{ 'padding': '0' }}fluid={true}>
+        <Button onClick={this.mute}>Mute</Button>
+        <Container style={{ 'padding': '0' }} fluid={true}>
           <Row noGutters={true}>
             <Col >
               <SynthLayout synthParams={this.state.synthParams} activeSynth={this.state.activeSynth} synthUpdate={this.synthUpdate} synthChange={this.synthChange} />
@@ -155,7 +235,8 @@ export class BasePage extends React.Component {
             </Col>
           </Row>
         </Container>
-        <PianoLayout synth={this.state.synth} />
+        <InfoDisplay />
+        <PianoLayout keysReady={this.initPiano} playPiano={this.playPiano} />
       </div>
     )
   }
