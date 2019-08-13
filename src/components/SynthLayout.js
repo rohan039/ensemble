@@ -29,14 +29,10 @@ const SynthLayout = (props) => {
     'Generic Synth'
   ];
 
-  const pluckUpdate = (updates) => {
-    props.synthUpdate(updates);
-  }
-
   let selectedSynth = null;
   switch (props.activeSynth) {
     case 'pluckSynth':
-      selectedSynth = <PluckSynth synthParams={props.synthParams.pluckSynth} onChange={pluckUpdate} />
+      selectedSynth = <PluckSynth synthParams={props.synthParams.pluckSynth} onChange={props.synthUpdate} />
       break;
     case 'AMSynth':
       selectedSynth = <AMSynth />
@@ -60,7 +56,7 @@ const SynthLayout = (props) => {
       selectedSynth = <NoiseSynth />
       break;
     case 'genericSynth':
-      selectedSynth = <BasicSynth />
+      selectedSynth = <BasicSynth onChange={props.synthUpdate} />
       break;
     default:
       selectedSynth = <p>None selected</p>

@@ -51,6 +51,8 @@ export class BasePage extends React.Component {
 
   synthUpdate = (updates) => {
 
+    let synth;
+
     switch (this.state.activeSynth) {
       case 'pluckSynth':
 
@@ -64,7 +66,7 @@ export class BasePage extends React.Component {
           }
         });
 
-        let synth = this.state.synth;
+        synth = this.state.synth;
 
         synth.volume.value = this.state.synthParams.pluckSynth.synthVolume;
         synth.attackNoise = this.state.synthParams.pluckSynth.attackNoise;
@@ -76,24 +78,26 @@ export class BasePage extends React.Component {
         break;
       case 'genericSynth':
 
-        // this.setState({
-        //   synthParams: {
-        //     ...this.state.synthParams,
-        //     genericSynth: {
-        //       ...this.state.synthParams.genericSynth,
-        //       ...updates
-        //     }
-        //   }
-        // });
+        this.setState({
+          synthParams: {
+            ...this.state.synthParams,
+            genericSynth: {
+              ...this.state.synthParams.genericSynth,
+              ...updates
+            }
+          }
+        });
 
-        // let synth = this.state.synth;
+        synth = this.state.synth;
 
-        // synth.volume.value = this.state.synthParams.genericSynth.synthVolume;
-
-        // // ToneAmplitudeEvnelope
-        // synth.envelope = 
-
-        // this.setState({ synth });
+        synth.voices.forEach(voice => {
+          voice.envelope.attack = this.state.synthParams.genericSynth.attack;
+          voice.envelope.decay = this.state.synthParams.genericSynth.decay;
+          voice.envelope.sustain = this.state.synthParams.genericSynth.sustain;
+          voice.envelope.release = this.state.synthParams.genericSynth.release;
+        });
+        
+        this.setState({ synth });
 
         break;
       default:

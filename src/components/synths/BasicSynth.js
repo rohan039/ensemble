@@ -3,7 +3,7 @@ import React from 'react';
 import { Container, Col, Row } from 'react-bootstrap';
 // import Knob from '../ui-controllers/Knob'
 import '../../css/synth-base.css'
-import ASDR from '../ui-controllers/ASDR';
+import ADSR from '../ui-controllers/ADSR';
 
 const BasicSynth = (props) => {
 
@@ -11,13 +11,13 @@ const BasicSynth = (props) => {
   //   props.onChange({ synthVolume });
   // };
 
-  const asdrUpdate = (positions) => {
-    console.log(positions);
+  const adsrUpdate = (adsrVals) => {
+    console.log(adsrVals);
     
   }
 
   return (
-    <div style={{ 'background': 'blue', 'color': 'white' }}>
+    <div style={{ 'background': 'grey', 'color': 'white' }}>
       <h3 style={{ 'padding': '0.5em' }} >Basic Synth</h3>
       <Container>
         <Row noGutters={true}>
@@ -30,9 +30,9 @@ const BasicSynth = (props) => {
           <p>partials</p>
         </Row>
         <Row noGutters={true}>
-          <ASDR
+          <ADSR
             radius={15}
-            onChange={asdrUpdate}
+            onChange={props.onChange}
           />
         </Row>
       </Container>

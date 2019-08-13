@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../css/adsr.css';
 
 class ASDR extends React.Component {
 
@@ -19,10 +20,13 @@ class ASDR extends React.Component {
       }
     }
 
+    this.mapPosToVals(this.position)
+
     this.strokeCol = '#3888f5';
     this.circFill = '#FFF';
     this.backFill = '#FFF';
     this.dashStrokeCol = '#6ca6f5';
+    this.borderFill = '#FFF'
   }
 
   handleMouseDown = e => {
@@ -46,7 +50,6 @@ class ASDR extends React.Component {
 
     if (Math.abs(xDiff) > this.props.radius) {
       document.removeEventListener('mousemove', this.handleMouseMove)
-      this.props.onChange(this.position);
     }
 
 
@@ -220,6 +223,14 @@ class ASDR extends React.Component {
       default:
         break;
     }
+
+    document.getElementById('peakText').innerHTML = 'A Amp: '+parseFloat(this.values.ampMaxValPerc*100).toFixed(0) + '%';
+    document.getElementById('AText').innerHTML = 'A: '+parseFloat(this.values.attack).toFixed(2) + 's';
+    document.getElementById('DText').innerHTML = 'D: '+parseFloat(this.values.decay).toFixed(2) + 's';
+    document.getElementById('SText').innerHTML = 'S: '+parseFloat(this.values.sustain*100).toFixed(0)+'%';
+    document.getElementById('RText').innerHTML = 'R: '+parseFloat(this.values.release).toFixed(2)+'s';
+
+    this.props.onChange(this.mapPosToVals(this.position));
   }
 
   handleMouseUp = (e) => {
@@ -232,17 +243,72 @@ class ASDR extends React.Component {
 
   }
 
+  map_range = (value, low1, high1, low2, high2) => {
+    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+  }
+
+  mapPosToVals = (pos) => {
+    let ampMaxValPerc = 1 - this.map_range(pos.a.y, 0, 200, 0, 1);
+    
+    // A range
+    // Input 0 - D.x
+    // Output 0 - 7
+
+    let attack = this.map_range(
+      Math.pow(pos.a.x,2), 
+      0, Math.pow(pos.d.x,2), 
+      0, 7);
+
+    // D range
+    // A.x - 300
+    // Output 0 - 7
+
+    let decay = this.map_range(
+      Math.pow(pos.d.x,2), 
+      0, Math.pow(300,2), 
+      0, 7
+    );
+
+    // decay = decay - attack;
+    // S range
+    // in: 0 - 200
+    // out: 0 - 100%
+
+    //linear map
+    let sustain = this.map_range(pos.s.y, 0, 200, 1, 0);
+
+    // R Range 
+    // Input 300 - 400
+    // Output 0 - 20
+    let release = this.map_range(
+      
+      Math.pow((pos.r.x - 300), 2), 
+      0 , Math.pow(100,2), 
+      0, 20
+    );
+
+    this.values = {
+      ampMaxValPerc, attack, decay, sustain, release
+    }
+
+    return this.values;
+
+  }
+
   render() {
     return (
       <div>
         <h4 >Envelope</h4>
         <svg className="svgClass" width="420" height="250" style={{ 'margin': '10px' }}>
-          <rect x="0" y="0" width="400" height="200" fill={this.backFill} />
 
-          <line id='vertALine' x1={this.position.a.x} y1='0' x2={this.position.a.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} stroke-dasharray="10" />
-          <line id='vertDLine' x1={this.position.d.x} y1='0' x2={this.position.d.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} stroke-dasharray="10" />
-          <line id='vertSLine' x1={this.position.s.x} y1='0' x2={this.position.s.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} stroke-dasharray="10" />
-          <line id='vertRLine' x1={this.position.r.x} y1='0' x2={this.position.r.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} stroke-dasharray="10" />
+          <rect x="0" y="0" width="400" height="230" fill={this.borderFill} />
+          <rect x="0" y="0" width="400" height="200" fill={this.backFill}/>
+          <line x1='0' y1='200' x2='400' y2='200' strokeWidth='3' stroke={this.strokeCol} />
+          
+          <line id='vertALine' x1={this.position.a.x} y1='0' x2={this.position.a.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
+          <line id='vertDLine' x1={this.position.d.x} y1='0' x2={this.position.d.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
+          <line id='vertSLine' x1={this.position.s.x} y1='0' x2={this.position.s.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
+          <line id='vertRLine' x1={this.position.r.x} y1='0' x2={this.position.r.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
 
           <line id='ALine' x1='0' y1='200' x2={this.position.a.x} y2={this.position.a.y} strokeWidth='3' stroke={this.strokeCol} />
           <line id='DLine' x1={this.position.a.x} y1={this.position.a.y} x2={this.position.d.x} y2={this.position.s.y} strokeWidth='3' stroke={this.strokeCol} />
@@ -250,7 +316,12 @@ class ASDR extends React.Component {
           <line id='RLine' x1={300} y1={this.position.s.y} x2={this.position.r.x} y2={200} strokeWidth='3' stroke={this.strokeCol} />
 
 
-
+          <text onDragStart={() => false} onMouseDown={() => false} id='peakText' x="8" stroke={this.strokeCol} y="221" >A Amp: {parseFloat(this.values.ampMaxValPerc*100).toFixed(0)}%</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='AText' x="110" stroke={this.strokeCol} y="221" >A: {parseFloat(this.values.attack).toFixed(2)}s</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='DText' x="175" stroke={this.strokeCol} y="221" >D: {parseFloat(this.values.decay).toFixed(2)}s</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='SText' x="240" stroke={this.strokeCol} y="221" >S: {parseFloat(this.values.sustain*100).toFixed(0)}%</text>
+          <text onDragStart={() => false} onMouseDown={() => false}  id='RText' x="295" stroke={this.strokeCol} y="221" >R: {parseFloat(this.values.release).toFixed(2)}s</text>
+          
           <circle
             cx={this.position.a.x}
             cy={this.position.a.y}
@@ -262,17 +333,7 @@ class ASDR extends React.Component {
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
           />
-          <circle
-            cx={this.position.d.x}
-            cy={this.position.d.y}
-            r={this.props.radius}
-            fill={this.circFill}
-            stroke={this.strokeCol}
-            strokeWidth="3"
-            id='D'
-            onMouseDown={this.handleMouseDown}
-            onMouseUp={this.handleMouseUp}
-          />
+          
           <circle
             cx={this.position.s.x}
             cy={this.position.s.y}
@@ -281,6 +342,17 @@ class ASDR extends React.Component {
             stroke={this.strokeCol}
             strokeWidth="3"
             id='S'
+            onMouseDown={this.handleMouseDown}
+            onMouseUp={this.handleMouseUp}
+          />
+          <circle
+            cx={this.position.d.x}
+            cy={this.position.d.y}
+            r={this.props.radius}
+            fill={this.circFill}
+            stroke={this.strokeCol}
+            strokeWidth="3"
+            id='D'
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
           />
@@ -297,6 +369,7 @@ class ASDR extends React.Component {
           />
 
           
+
 
         </svg>
       </div>
