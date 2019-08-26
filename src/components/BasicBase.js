@@ -14,7 +14,7 @@ import * as api from '../api';
 import PianoLayout from './PianoLayout';
 import InfoDisplay from './InfoDisplay';
 import ADSR from './ui-controllers/ADSR';
-
+import '../css/adsr.css';
 
 
 export class BasePage extends React.Component {

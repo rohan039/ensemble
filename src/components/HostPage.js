@@ -47,6 +47,7 @@ export class HostPage extends React.Component {
       readyModelClients: [],
       readyNotesClients: [],
       connections: [],
+      showChords: false
     }
 
     this.nOfBars = 8;
@@ -147,7 +148,7 @@ export class HostPage extends React.Component {
 
     if (this.state.readyModelClients.length > 2) {
       api.sendChords(chordProgressions[2])
-      this.setState({ startError: false })
+      this.setState({ startError: false, showChords: true })
     } else {
       this.setState({ startError: true })
     }
@@ -172,7 +173,10 @@ export class HostPage extends React.Component {
               </h2>
                   {this.state.clients && <p>{this.state.clients.length - 1} clients connected.</p>}
 
+                  
                   <InfoDisplay />
+                  {this.state.showChords && <p>Sending 16 bars of chords: <br/> C, Am, F, G, C, F, G, C,
+                  C, Am, F, G, C, F, G, C, </p>}
 
                   {this.state.readyModelClients.length > 2 && <Button onClick={this.sendChords}>Send Chords</Button>}
                   {this.state.readyNotesClients.length > 2 && <Button variant="success" onClick={this.start}>Start</Button>}
