@@ -5,6 +5,12 @@ function openConnection(cb) {
   socket = openSocket('http://localhost:8000');
 }
 
+function getID(cb) {
+  socket.on('getID', myID => {
+    cb(myID)
+  })
+}
+
 function subscribeToSongInfo(cb) {
   // socket.on('timer', timestamp => cb(null, timestamp));
   socket.on('songInfoUpdate', songInfo => {
@@ -29,8 +35,12 @@ function chordUpdate(cb) {
   })
 }
 
-function announceReady() {
-  socket.emit('ready')
+function announceModelReady() {
+  socket.emit('modelReady')
+}
+
+function announceNotesReady() {
+  socket.emit('notesReady')
 }
 
 function startPlaying(cb) {
@@ -48,9 +58,15 @@ function tellStart() {
   socket.emit('initPlaying')
 }
 
-function getClientsReady(cb) {
-  socket.on('clientsReady', clientsReady => {
-    cb(clientsReady)
+function getClientsModelReady(cb) {
+  socket.on('clientsModelReady', clientsModelReady => {
+    cb(clientsModelReady)
+  })
+}
+
+function getClientsNotesReady(cb) {
+  socket.on('clientsNotesReady', clientsNotesReady => {
+    cb(clientsNotesReady)
   })
 }
 
@@ -60,8 +76,12 @@ function connectHost(cb) {
   });
 }
 
-function pingClientStatus() {
-  socket.emit('checkStatus')
+function pingClientModelStatus() {
+  socket.emit('checkModelStatus')
+}
+
+function pingClientNotesStatus() {
+  socket.emit('checkNotesStatus')
 }
 
 function hostSuccess(cb) {
@@ -88,10 +108,17 @@ function disconnectMe() {
   socket.close()
 }
 
-export { subscribeToSongInfo, 
+export { 
+  getID,
+  subscribeToSongInfo, 
   hostSuccess, connectHost, subscribeToHostUpdates, 
   disconnectMe, openConnection, clientUpdates,
-  sendChords, chordUpdate, announceReady, getClientsReady,
-  pingClientStatus, startPlaying,
-  tellStart
+  sendChords, chordUpdate,
+
+  getClientsNotesReady, getClientsModelReady,
+  announceModelReady, announceNotesReady,
+  pingClientModelStatus, pingClientNotesStatus, 
+  
+  startPlaying,
+  tellStart, 
 };

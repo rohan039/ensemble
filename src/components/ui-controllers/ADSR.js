@@ -248,7 +248,7 @@ class ASDR extends React.PureComponent {
 
   handleMouseUp = (e) => {
     document.removeEventListener('mousemove', this.handleMouseMove)
-    this.props.onChange(this.position);
+   
     this.position = {
       ...this.position,
       coords: {}

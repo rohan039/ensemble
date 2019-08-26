@@ -44,7 +44,8 @@ export class HostPage extends React.Component {
     this.state = {
       isHost: false,
       startError: false,
-      readyClients: [],
+      readyModelClients: [],
+      readyNotesClients: [],
       connections: [],
     }
 
@@ -79,12 +80,17 @@ export class HostPage extends React.Component {
       console.log(connections);
     })
 
-    api.getClientsReady(clients => {
-      this.setState({ readyClients: clients })
+    api.getClientsModelReady(clients => {
+      this.setState({ readyModelClients: clients })
     })
 
-    api.pingClientStatus()
-    
+    api.getClientsNotesReady(clients => {  
+      this.setState({ readyNotesClients: clients })
+    })
+
+    api.pingClientModelStatus()
+    api.pingClientNotesStatus()
+
     // this.initChordRNN(chordProgressions[2]);
   }
 
@@ -139,7 +145,7 @@ export class HostPage extends React.Component {
 
   sendChords = () => {
 
-    if (this.state.readyClients.length > 2) {
+    if (this.state.readyModelClients.length > 2) {
       api.sendChords(chordProgressions[2])
       this.setState({ startError: false })
     } else {
@@ -155,8 +161,8 @@ export class HostPage extends React.Component {
   render() {
     return (
       <div className="App">
-        <h1>Host</h1>
-        <Container style={{ 'padding': '0' }} fluid={true}>
+        <h1>Conductor</h1>
+        <Container fluid={true}>
           <Row noGutters={true}>
             <Col>
               {this.state.isHost &&
@@ -168,8 +174,8 @@ export class HostPage extends React.Component {
 
                   <InfoDisplay />
 
-                  {this.state.readyClients.length > 2 && <Button onClick={this.sendChords}>Send Chords</Button>}
-                  {this.state.readyClients.length > 2 && <Button onClick={this.start}>Start</Button>}
+                  {this.state.readyModelClients.length > 2 && <Button onClick={this.sendChords}>Send Chords</Button>}
+                  {this.state.readyNotesClients.length > 2 && <Button variant="success" onClick={this.start}>Start</Button>}
                   
                   {this.state.startError && <p> Either all clients are not ready or less than 3 are connected and ready</p>}
                 </div>
@@ -190,15 +196,12 @@ export class HostPage extends React.Component {
               <ListGroup variant="flush">
                 {this.state.clients && this.state.clients.map((client) => {
                   if (client !== this.state.hostID) {
-
-                    if (this.state.readyClients && this.state.readyClients.includes(client)) {
-                      return (
-                        <ListGroup.Item key={client} variant="success">{client} is ready!</ListGroup.Item>
-                      )
+                    if (this.state.readyNotesClients && this.state.readyNotesClients.includes(client)) {
+                      return <ListGroup.Item key={client} variant="success">{client}'s notes are ready!</ListGroup.Item>
+                    } else if (this.state.readyModelClients && this.state.readyModelClients.includes(client)) {
+                      return <ListGroup.Item key={client} variant="warning">{client}'s model is loaded!</ListGroup.Item>
                     } else {
-                      return (
-                        <ListGroup.Item key={client}>{client}</ListGroup.Item>
-                      )
+                      return <ListGroup.Item key={client}>{client}</ListGroup.Item>
                     }
                     
                   }

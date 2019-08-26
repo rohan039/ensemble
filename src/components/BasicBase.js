@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 // import { TextButton, Dial } from 'react-nexusui';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, ButtonGroup } from 'react-bootstrap';
 import Tone, { Transport, Player, Part, Event } from 'tone';
 import AudioKeys from 'audiokeys';
 
@@ -13,6 +13,7 @@ import * as Chord from "tonal-chord";
 import * as api from '../api';
 import PianoLayout from './PianoLayout';
 import InfoDisplay from './InfoDisplay';
+import ADSR from './ui-controllers/ADSR';
 
 
 
@@ -27,24 +28,34 @@ export class BasePage extends React.Component {
     super(props);
 
     api.openConnection();
+    api.getID((id) => {
+      this.setState({ clientID: id })
+    })
 
-    this.synth = new Tone.PolySynth(3, Tone.Synth, {
+
+    this.attack = 0.01;
+    this.decay = 0.1;
+    this.sustain = 0.5;
+    this.release = 5;
+
+    this.synth = new Tone.PolySynth(7, Tone.Synth, {
       "oscillator": {
         "type": "fatsawtooth",
         // "type": "triangle8",
         // "type": "square",
         "count": 1,
-        "spread": 30,
+        "spread": 10,
       },
       "envelope": {
-        "attack": 0.01,
-        "decay": 0.1,
-        "sustain": 0.5,
-        "release": 0.4,
-        "attackCurve": "exponential"
+        "attack": this.attack,
+        "decay": this.decay,
+        "sustain": this.sustain,
+        "release": this.release,
+        "attackCurve": "linear"
       },
     }).toMaster();
 
+    // this.synth = new Tone.PolySynth(8, Tone['Synth']).toMaster();
 
     this.comp = new Tone.PolySynth(6, Tone.Synth, {
       "oscillator": {
@@ -63,18 +74,22 @@ export class BasePage extends React.Component {
 
     this.melodiesIndex = 0;
 
-    this.muted = false;
+
 
     this.state = {
-      loadingModel: true
-
+      loadingModel: true,
+      transpose: 0,
+      temperature: 1,
+      muted: false,
+      currentChord: [],
+      synth: this.synth,
 
     }
     this.nOfBars = 16;
 
     api.chordUpdate((chords) => {
       console.log('got chords');
-      
+
       if (!this.state.loadingModel) {
         this.initChordRNN(chords)
       }
@@ -93,61 +108,39 @@ export class BasePage extends React.Component {
 
   }
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     console.log('unmount');
-
     api.disconnectMe(this.state.isHost)
   }
 
-  loadChordRNN() {
+  loadChordRNN = () => {
     const model = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv');
     model.initialize()
       .then(() => {
         console.log('chord model loaded!');
         this.setState({ loadingModel: false })
         this.model = model;
-        api.announceReady();
+        api.announceModelReady();
       })
   }
 
 
-  initChordRNN(chordProgression) {
+  initChordRNN = (chordProgression) => {
 
-    let mel = this.model.continueSequence(
+    this.model.continueSequence(
       presetMelodies['Twinkle'],
       this.nOfBars * 16,
-      1.2, // Temp
+      0.8, // Temp
       chordProgression,
     ).then((i) => {
       this.setMelodies([i], chordProgression);
     });
-
-    // model.initialize()
-    //   .then(() => {
-    //     console.log('chord model initialized!');
-    //     return model.continueSequence(
-    //       presetMelodies['Twinkle'],
-    //       this.nOfBars * 16,
-    //       1.0, // Temp
-    //       chordProgression,
-    //     );
-    //   })
-    //   .then((i) => {
-    //     // console.log(i);
-    //     this.setMelodies([i], chordProgression);
-    //     this.model = model;
-    //     this.setState({
-    //       loadingModel: false,
-    //     });
-    //     // this.sound.triggerSoundEffect(4);
-    //     console.log('chord model loaded');
-    //   });
   }
 
 
-  setMelodies(m, c) {
+  setMelodies = (m, c) => {
 
-    this.melodies = m;  
+    this.melodies = m;
 
     let notes = m[this.melodiesIndex].notes.map(note => {
       const s = note.quantizedStartStep;
@@ -176,8 +169,6 @@ export class BasePage extends React.Component {
       notes = notes.concat(chordNotes);
     }
 
-    console.log(notes);
-
     if (this.part) {
       this.part.stop();
     }
@@ -185,18 +176,28 @@ export class BasePage extends React.Component {
     this.part = new Tone.Part((time, value) => {
 
       if (!value.chord) {
-        // console.log(value.note - 36);
+        this.synth.triggerAttackRelease(Tone.Frequency(value.note).transpose(12 * this.state.transpose), "8n", time);
 
-        this.synth.triggerAttackRelease(value.note, "8n", time);
-        this.piano.toggleKey(Tone.Frequency(value.note).toMidi());
-        // this.piano.toggleKey(Tone.Frequency(value.note).toMidi(), true);
+        let keyToToggle = Tone.Frequency(value.note).transpose(12 * this.state.transpose).toMidi();
+
+        if (keyToToggle >= 0 && keyToToggle <= 120) {
+          this.piano.toggleKey(keyToToggle, true);
+          setTimeout(() => { this.piano.toggleKey(keyToToggle, false); }, 120);
+        }
       } else {
         const notes = value.note.map(n => n + '3');
+        console.log(value.note);
+        this.setState({ currentChord: value.note })
+
         this.comp.triggerAttackRelease(notes, '1m', time, 1.0);
-        notes.forEach(note => this.piano.toggleKey(Tone.Frequency(note).toMidi()));
 
-        // notes.forEach(note => this.piano.toggleKey(Tone.Frequency(note).toMidi(), false));
-
+        notes.forEach(note => {
+          let keyToToggle = Tone.Frequency(note).toMidi()
+          if (keyToToggle >= 0 && keyToToggle <= 120) {
+            this.piano.toggleKey(keyToToggle, true)
+            setTimeout(() => { this.piano.toggleKey(keyToToggle, false); }, 1200);
+          }
+        });
       }
 
     }, notes);
@@ -206,6 +207,8 @@ export class BasePage extends React.Component {
 
     console.log(notes);
     // this.part.start();
+
+    api.announceNotesReady();
   }
 
   generateOptions = () => {
@@ -269,26 +272,65 @@ export class BasePage extends React.Component {
       if (note.note >= 0 && note.note <= 120) {
 
         this.piano.toggleKey(note.note, true);
+        // console.log(note.note, this.synth);
+
+        console.log(Tone.Frequency(note.note, "midi").toNote());
+        
+        this.synth.triggerAttack(Tone.Frequency(note.note, "midi").toNote());
       }
     });
 
     this.keyboard.up(note => {
       if (note.note >= 0 && note.note <= 120) {
         this.piano.toggleKey(note.note, false);
+        
+        
+        this.synth.triggerRelease(Tone.Frequency(note.note, "midi").toNote());
       }
     });
 
   }
 
-  mute = (e) => {
-    if (this.muted) {
+  mute = () => {
+    if (this.state.muted) {
       Tone.Master.mute = false;
-      this.muted = false;
+      this.setState({ muted: false })
     } else {
-      this.muted = true;
       Tone.Master.mute = true;
+      this.setState({ muted: true })
     }
+  }
 
+  transposeUp = () => {
+    if (this.state.transpose < 8) {
+      this.setState({ transpose: this.state.transpose + 1 })
+    }
+  }
+
+  transposeDown = () => {
+    if (this.state.transpose > -8) {
+      this.setState({ transpose: this.state.transpose - 1 })
+    }
+  }
+
+  transposeReset = () => {
+    this.setState({ transpose: 0 })
+  }
+
+  tempUp = () => {
+    if (this.state.temperature < 2) {
+      this.setState({ temperature: Math.round((this.state.temperature + 0.1) * 10) / 10 })
+    }
+  }
+
+  tempDown = () => {
+    if (this.state.temperature > 0.1) {
+      this.setState({ temperature: Math.round((this.state.temperature - 0.1) * 10) / 10 })
+    }
+  }
+
+  tempReset = () => {
+    this.setState({ temperature: 1 })
   }
 
 
@@ -296,33 +338,80 @@ export class BasePage extends React.Component {
 
   }
 
+  ADSRChange = (updates) => {
+    
+    console.log(updates);
+
+    
+    this.synth.voices.forEach(voice => {
+      voice.envelope.attack = updates.attack;
+      voice.envelope.decay = updates.decay;
+      voice.envelope.sustain = updates.sustain;
+      voice.envelope.release = updates.release;
+
+    })   
+  }
+
   render() {
     return (
       <div className="App">
-        <Button onClick={this.mute}>Mute</Button>
-        <Button as={NavLink} to="/host">Host</Button>
-        <p>
-          Need to include:
-        <br />
-          <br />
-          volume <br />
-          note indicators <br />
-          synth presets<br />
 
-          <br />
-          Want:
-        <br />
-          basic Fx
-  
-  
-  
-        </p>
+        <Button as={NavLink} to="/host">Pick me as host</Button>
+        <h1>Player</h1>
+        {this.state.clientID && <h6>Connected. ClientID: {this.state.clientID}</h6>}
+
+
+        <p></p>
+
+
+        <Container fluid={true} style={{ 'margin': '0' }}>
+        <Row>
+          <Col>
+            <Row noGutters={true} style={{ 'padding': '0 0 1em 0' }}>
+              <Button variant="outline-primary" style={{ 'margin': '0 1em 0 1em' }} active={!this.state.muted} onClick={this.mute}>
+                {this.state.muted ? 'Muted' : 'Mute'}
+              </Button>
+            </Row>
+
+            <Row noGutters={true} style={{ 'padding': '0 0 1em 0' }}>
+              <ButtonGroup style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
+                <Button onClick={this.transposeReset} variant="secondary">Reset</Button>
+                <Button onClick={this.transposeUp} variant="secondary">+</Button>
+                <Button onClick={this.transposeDown} variant="secondary">-</Button>
+              </ButtonGroup>
+              <h4 >Transpose oct: {(this.state.transpose <= 0 ? "" : "+") + this.state.transpose}</h4>
+
+            </Row>
+
+            <Row noGutters={true} style={{ 'padding': '0 0 1em 0' }}>
+              <ButtonGroup style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
+                <Button onClick={this.tempReset} variant="secondary">Reset</Button>
+                <Button onClick={this.tempUp} variant="secondary">+</Button>
+                <Button onClick={this.tempDown} variant="secondary">-</Button>
+              </ButtonGroup>
+              <h4  >Temperature: {this.state.temperature}</h4>
+            </Row>
+          </Col>
+          <Col>
+            <Row style={{ 'padding': '0 0 1em 0' }}>
+              
+              <ADSR
+              title='Amplitude Env'
+              radius={15}
+              onChange={this.ADSRChange}
+            />
+            </Row>
+          </Col>
+      </Row>
+        </Container>
+
         <Container style={{ 'padding': '0' }} fluid={true}>
           <Row noGutters={true}>
-
+            <p>Chord: {JSON.stringify(this.state.currentChord)}</p>
+            
           </Row>
         </Container>
-        <InfoDisplay />
+
         <PianoLayout keysReady={this.initPiano} playPiano={this.playPiano} />
       </div>
     )

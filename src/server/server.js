@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 var songInfo = {
   beat: 1,
   bar: 1,
-  chord: structure[0],
+  chord: null,
   chordProgress: 0,
 }
 
@@ -14,20 +14,28 @@ var timers = []
 var hostID;
 
 var connections = [];
-var clientsReady = [];
+var clientsModelReady = [];
+var clientsNotesReady = [];
 
 io.on('connection', (client) => {
 
   connections.push(client.id)
 
+  console.log(client.id, 'connected');
+
+  io.to(client.id).emit('getID', client.id);
+
+
   if (hostID) {
     io.to(hostID).emit('clientConnected', connections);
   }
 
-  console.log(client.id, 'connected');
+  client.on('checkModelStatus', () => {
+    io.to(hostID).emit('clientsModelReady', clientsModelReady);
+  })
 
-  client.on('checkStatus', () => {
-    io.to(hostID).emit('clientsReady', clientsReady);
+  client.on('checkNoteStatus', () => {
+    io.to(hostID).emit('clientsNotesReady', clientsNotesReady);
   })
 
   client.on('initPlaying', () => {
@@ -58,7 +66,8 @@ io.on('connection', (client) => {
     
     if (client.id !== hostID) {
       console.log(client.id,'disconnected');
-      clientsReady = clientsReady.filter(item => item !== client.id);
+      clientsModelReady = clientsModelReady.filter(item => item !== client.id);
+      clientsNotesReady = clientsNotesReady.filter(item => item !== client.id);
     } else {
       console.log(client.id,'disconnected  <-- Host');
       client.emit('hostDisconnected');
@@ -70,12 +79,21 @@ io.on('connection', (client) => {
     client.broadcast.emit('chordUpdate', chords);
   })
 
-  client.on('ready', () => {
+  client.on('modelReady', () => {
 
-    clientsReady.push(client.id);
-    console.log(client.id, 'READY');
+    clientsModelReady.push(client.id);
+    console.log(client.id, 'Model READY');
     
-    io.to(hostID).emit('clientsReady', clientsReady);
+    io.to(hostID).emit('clientsModelReady', clientsModelReady);
+
+  })
+
+  client.on('notesReady', () => {
+
+    clientsNotesReady.push(client.id);
+    console.log(client.id, 'Notes READY');
+    
+    io.to(hostID).emit('clientsNotesReady', clientsNotesReady);
 
   })
 
