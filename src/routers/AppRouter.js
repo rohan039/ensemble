@@ -5,7 +5,9 @@ import * as createHistory from "history";
 import PublicRoute from './PublicRoute';
 // import AdminRoute from './AdminRoute';
 
-import BasePage from '../components/BasePage';;
+import BasePage from '../components/BasePage';
+import BasicBase from '../components/BasicBase';
+import HostPage from '../components/HostPage';
 
 export const history = createHistory.createBrowserHistory();
 // export const history = createHistory();
@@ -16,8 +18,9 @@ const AppRouter = () => (
     <div>
       <Switch>
         
-        <PublicRoute path="/base" component={BasePage} exact={true} />
-        <Redirect  from="/" to="/base" component={BasePage} />
+        <PublicRoute path="/base" component={BasicBase} exact={true} />
+        <PublicRoute path="/host" component={HostPage} exact={true} />
+        <Redirect  from="/" to="/base" component={BasicBase} />
       </Switch>
     </div>
   </Router>

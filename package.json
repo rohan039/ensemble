@@ -4,9 +4,11 @@
   "private": true,
   "dependencies": {
     "@magenta/music": "^1.10.0",
+    "@material-ui/core": "^4.3.2",
     "audiokeys": "^0.1.1",
     "bootstrap": "^4.3.1",
     "history": "^4.9.0",
+    "lodash": "^4.17.15",
     "nexusui": "^2.0.10",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.10",
@@ -20,6 +22,7 @@
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
     "svg.js": "^2.7.1",
+    "tonal-chord": "^2.2.2",
     "tone": "^13.4.9"
   },
   "scripts": {

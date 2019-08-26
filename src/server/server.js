@@ -2,28 +2,6 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-
-// Blues in C
-// C7-4 | F7-2 | C7-2 | G7-1 | F7-1 | C7-2 |
-
-// in 12 Semitones
-var chords = {
-  C7 : [0, 4, 7, 10],
-  F7 : [5, 9, 11, 14],
-  G7 : [7, 11, 14, 17] 
-}
-
-// improv rnn
-
-var structure = [
-  chords.C7, chords.C7, chords.C7, chords.C7,
-  chords.F7, chords.F7,
-  chords.C7, chords.C7,
-  chords.G7,
-  chords.F7,
-  chords.C7, chords.C7
-]
-
 var songInfo = {
   beat: 1,
   bar: 1,
@@ -33,10 +11,76 @@ var songInfo = {
 
 var timers = []
 
+var hostID;
+
+var connections = [];
+var clientsReady = [];
+
 io.on('connection', (client) => {
-  
-  client.on('subscribeToSongInfo', () => {
+
+  connections.push(client.id)
+
+  if (hostID) {
+    io.to(hostID).emit('clientConnected', connections);
+  }
+
+  console.log(client.id, 'connected');
+
+  client.on('checkStatus', () => {
+    io.to(hostID).emit('clientsReady', clientsReady);
+  })
+
+  client.on('initPlaying', () => {
+    client.broadcast.emit('startPlaying');
+  })
+
+  client.on('connectHost', () => {
+    if (!hostID) {
+      console.log(client.id, 'is now host');
+
+      hostIsConnected = true;
+      hostID = client.id;
+      io.to(hostID).emit('hostConfirm', hostID);
+      io.to(hostID).emit('clientConnected', connections);
+      connections = connections.filter(item => item === hostID)
+    } else {
+      console.log('a host already exists');
+      client.emit('hostExists', hostID);
+    }
+  })
+
+  client.on('disconnect', () => {
+
+    connections = connections.filter(item => item !== client.id)
     
+    io.to(hostID).emit('clientConnected', connections);
+    console.log(hostID, 'host id');
+    
+    if (client.id !== hostID) {
+      console.log(client.id,'disconnected');
+      clientsReady = clientsReady.filter(item => item !== client.id);
+    } else {
+      console.log(client.id,'disconnected  <-- Host');
+      client.emit('hostDisconnected');
+      hostID = undefined;
+    }
+  });
+
+  client.on('initChords', (chords) => {
+    client.broadcast.emit('chordUpdate', chords);
+  })
+
+  client.on('ready', () => {
+
+    clientsReady.push(client.id);
+    console.log(client.id, 'READY');
+    
+    io.to(hostID).emit('clientsReady', clientsReady);
+
+  })
+
+  client.on('subscribeToSongInfo', () => {
+
     console.log('subscribed to song info');
 
     songInfo = {
@@ -50,7 +94,7 @@ io.on('connection', (client) => {
       clearInterval(timers[0]);
       timers = [];
     }
-    
+
     timers.push(setInterval(() => {
       client.emit('songInfoUpdate', songInfo);
 
@@ -66,7 +110,7 @@ io.on('connection', (client) => {
       }
     }, 750));
   })
-  
+
 });
 
 const port = '8000';

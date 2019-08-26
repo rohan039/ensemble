@@ -35,6 +35,15 @@ export class BasePage extends React.Component {
           attackNoise: 1,
           dampening: 4000,
           resonance: 0.7
+        },
+        genericSynth: {
+          volume: -6,
+          oscType: 'triangle',
+          ampMaxValPerc: 0,
+          attack: -3,
+          decay: 1,
+          sustain: 4000,
+          release: 0.7
         }
       }
     }
@@ -73,6 +82,8 @@ export class BasePage extends React.Component {
         synth.dampening.value = this.state.synthParams.pluckSynth.dampening;
         synth.resonance.value = this.state.synthParams.pluckSynth.resonance;
 
+
+        
         this.setState({ synth });
 
         break;
@@ -91,12 +102,16 @@ export class BasePage extends React.Component {
         synth = this.state.synth;
 
         synth.voices.forEach(voice => {
+          voice.oscillator.type = this.state.synthParams.genericSynth.oscType;
           voice.envelope.attack = this.state.synthParams.genericSynth.attack;
           voice.envelope.decay = this.state.synthParams.genericSynth.decay;
           voice.envelope.sustain = this.state.synthParams.genericSynth.sustain;
           voice.envelope.release = this.state.synthParams.genericSynth.release;
+          voice.volume.value = this.state.synthParams.genericSynth.volume - this.state.synthParams.genericSynth.ampMaxValPerc;
         });
         
+        // dB = 10 log(1 + X)
+
         this.setState({ synth });
 
         break;
@@ -112,7 +127,6 @@ export class BasePage extends React.Component {
 
     this.blurAll();
     window.scrollTo(xOff, yOff);
-    console.log(e.target.value)
 
     let synth = null;
 
@@ -156,9 +170,6 @@ export class BasePage extends React.Component {
         break;
       case 'genericSynth':
         synth = new Tone.PolySynth(8, Tone["Synth"]).toMaster();
-
-        console.log(synth.voices);
-        
         this.setState({ synth, activeSynth: 'genericSynth', poly: true });
         break;
       default:
@@ -218,12 +229,7 @@ export class BasePage extends React.Component {
 
   }
 
-  blurAll() {
-    var tmp = document.createElement("input");
-    document.body.appendChild(tmp);
-    tmp.focus();
-    document.body.removeChild(tmp);
-  }
+  
 
   render() {
     return (

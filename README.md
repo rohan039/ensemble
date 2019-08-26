@@ -10,6 +10,8 @@
 - Musical Feeling indicator?
 - Master Volume level
 
+- JS Throttle event listeners
+
 - Node Server
   - Websocket sync
   - Tenserflow-js keras import

@@ -6,7 +6,7 @@ export class PianoLayout extends React.PureComponent {
   render() {
     return (
       <div>
-        <Piano onReady={this.props.keysReady} onChange={this.props.playPiano} lowNote={36} highNote={108} />
+        <Piano size={[900,120]} onReady={this.props.keysReady} onChange={this.props.playPiano} lowNote={0} highNote={120} />
       </div>
     )
   }

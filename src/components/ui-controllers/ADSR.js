@@ -1,13 +1,14 @@
 import React from 'react';
+import * as _ from 'lodash';
 import '../../css/adsr.css';
 
-class ASDR extends React.Component {
+class ASDR extends React.PureComponent {
 
   constructor(props) {
     super(props);
     this.position = {
       a: {
-        x: 50, y: 20
+        x: 50, y: 0
       },
       d: {
         x: 120, y: 100
@@ -27,6 +28,8 @@ class ASDR extends React.Component {
     this.backFill = '#FFF';
     this.dashStrokeCol = '#6ca6f5';
     this.borderFill = '#FFF'
+
+    this.throttledUpdate = _.throttle(this.updatePosVals, 20)
   }
 
   handleMouseDown = e => {
@@ -43,13 +46,13 @@ class ASDR extends React.Component {
     document.addEventListener('mousemove', this.handleMouseMove)
   }
 
-  handleMouseMove = (e) => {
-
+  updatePosVals = (e) => {
     const xDiff = this.position.coords.x - e.pageX
     const yDiff = this.position.coords.y - e.pageY
 
     if (Math.abs(xDiff) > this.props.radius) {
       document.removeEventListener('mousemove', this.handleMouseMove)
+      this.props.onChange(this.mapPosToVals(this.position));
     }
 
 
@@ -153,7 +156,7 @@ class ASDR extends React.Component {
 
         break;
       case 'S':
-        
+
 
         if (this.position.s.y - yDiff > 0 && this.position.s.y - yDiff < 201) {
           this.position = {
@@ -224,13 +227,23 @@ class ASDR extends React.Component {
         break;
     }
 
-    document.getElementById('peakText').innerHTML = 'A Amp: '+parseFloat(this.values.ampMaxValPerc*100).toFixed(0) + '%';
-    document.getElementById('AText').innerHTML = 'A: '+parseFloat(this.values.attack).toFixed(2) + 's';
-    document.getElementById('DText').innerHTML = 'D: '+parseFloat(this.values.decay).toFixed(2) + 's';
-    document.getElementById('SText').innerHTML = 'S: '+parseFloat(this.values.sustain*100).toFixed(0)+'%';
-    document.getElementById('RText').innerHTML = 'R: '+parseFloat(this.values.release).toFixed(2)+'s';
-
     this.props.onChange(this.mapPosToVals(this.position));
+
+    document.getElementById('peakText').innerHTML = 'A Amp: -' + parseFloat(this.values.ampMaxValPerc).toFixed(2) + 'dB';
+    document.getElementById('AText').innerHTML = 'A: ' + parseFloat(this.values.attack).toFixed(2) + 's';
+    document.getElementById('DText').innerHTML = 'D: ' + parseFloat(this.values.decay).toFixed(2) + 's';
+    document.getElementById('SText').innerHTML = 'S: ' + parseFloat(this.values.sustain * 100).toFixed(0) + '%';
+    document.getElementById('RText').innerHTML = 'R: ' + parseFloat(this.values.release).toFixed(2) + 's';
+
+    this.mapPosToVals(this.position)
+  }
+
+  handleMouseMove = (e) => {
+    // e.persist();
+
+    this.throttledUpdate(e)
+
+
   }
 
   handleMouseUp = (e) => {
@@ -241,6 +254,8 @@ class ASDR extends React.Component {
       coords: {}
     }
 
+
+
   }
 
   map_range = (value, low1, high1, low2, high2) => {
@@ -248,15 +263,16 @@ class ASDR extends React.Component {
   }
 
   mapPosToVals = (pos) => {
-    let ampMaxValPerc = 1 - this.map_range(pos.a.y, 0, 200, 0, 1);
-    
+    let ampMaxValPerc = 1 - this.map_range(pos.a.y, 4, 200, 0, -50);
+
+    if (ampMaxValPerc < 0) ampMaxValPerc = 0;
     // A range
     // Input 0 - D.x
     // Output 0 - 7
 
     let attack = this.map_range(
-      Math.pow(pos.a.x,2), 
-      0, Math.pow(pos.d.x,2), 
+      Math.pow(pos.a.x, 2),
+      0, Math.pow(pos.d.x, 2),
       0, 7);
 
     // D range
@@ -264,8 +280,8 @@ class ASDR extends React.Component {
     // Output 0 - 7
 
     let decay = this.map_range(
-      Math.pow(pos.d.x,2), 
-      0, Math.pow(300,2), 
+      Math.pow(pos.d.x, 2),
+      Math.pow(pos.a.x, 2), Math.pow(300, 2),
       0, 7
     );
 
@@ -281,9 +297,9 @@ class ASDR extends React.Component {
     // Input 300 - 400
     // Output 0 - 20
     let release = this.map_range(
-      
-      Math.pow((pos.r.x - 300), 2), 
-      0 , Math.pow(100,2), 
+
+      Math.pow((pos.r.x - 300), 2),
+      0, Math.pow(100, 2),
       0, 20
     );
 
@@ -298,13 +314,13 @@ class ASDR extends React.Component {
   render() {
     return (
       <div>
-        <h4 >Envelope</h4>
-        <svg className="svgClass" width="420" height="250" style={{ 'margin': '10px' }}>
+        <h4>{this.props.title}</h4>
+        <svg className="svgClass" width="400" height="250">
 
           <rect x="0" y="0" width="400" height="230" fill={this.borderFill} />
-          <rect x="0" y="0" width="400" height="200" fill={this.backFill}/>
+          <rect x="0" y="0" width="400" height="200" fill={this.backFill} />
           <line x1='0' y1='200' x2='400' y2='200' strokeWidth='3' stroke={this.strokeCol} />
-          
+
           <line id='vertALine' x1={this.position.a.x} y1='0' x2={this.position.a.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
           <line id='vertDLine' x1={this.position.d.x} y1='0' x2={this.position.d.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
           <line id='vertSLine' x1={this.position.s.x} y1='0' x2={this.position.s.x} y2='200' strokeWidth='1' stroke={this.dashStrokeCol} strokeDasharray="12" />
@@ -316,12 +332,12 @@ class ASDR extends React.Component {
           <line id='RLine' x1={300} y1={this.position.s.y} x2={this.position.r.x} y2={200} strokeWidth='3' stroke={this.strokeCol} />
 
 
-          <text onDragStart={() => false} onMouseDown={() => false} id='peakText' x="8" stroke={this.strokeCol} y="221" >A Amp: {parseFloat(this.values.ampMaxValPerc*100).toFixed(0)}%</text>
-          <text onDragStart={() => false} onMouseDown={() => false} id='AText' x="110" stroke={this.strokeCol} y="221" >A: {parseFloat(this.values.attack).toFixed(2)}s</text>
-          <text onDragStart={() => false} onMouseDown={() => false} id='DText' x="175" stroke={this.strokeCol} y="221" >D: {parseFloat(this.values.decay).toFixed(2)}s</text>
-          <text onDragStart={() => false} onMouseDown={() => false} id='SText' x="240" stroke={this.strokeCol} y="221" >S: {parseFloat(this.values.sustain*100).toFixed(0)}%</text>
-          <text onDragStart={() => false} onMouseDown={() => false}  id='RText' x="295" stroke={this.strokeCol} y="221" >R: {parseFloat(this.values.release).toFixed(2)}s</text>
-          
+          <text onDragStart={() => false} onMouseDown={() => false} id='peakText' x="8" stroke={this.strokeCol} y="221" >A Amp: -{parseFloat(this.values.ampMaxValPerc).toFixed(0)}dB</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='AText' x="135" stroke={this.strokeCol} y="221" >A: {parseFloat(this.values.attack).toFixed(2)}s</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='DText' x="200" stroke={this.strokeCol} y="221" >D: {parseFloat(this.values.decay).toFixed(2)}s</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='SText' x="265" stroke={this.strokeCol} y="221" >S: {parseFloat(this.values.sustain * 100).toFixed(0)}%</text>
+          <text onDragStart={() => false} onMouseDown={() => false} id='RText' x="320" stroke={this.strokeCol} y="221" >R: {parseFloat(this.values.release).toFixed(2)}s</text>
+
           <circle
             cx={this.position.a.x}
             cy={this.position.a.y}
@@ -332,8 +348,10 @@ class ASDR extends React.Component {
             id='A'
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
+            onDragStart={() => false} 
+     
           />
-          
+
           <circle
             cx={this.position.s.x}
             cy={this.position.s.y}
@@ -344,6 +362,8 @@ class ASDR extends React.Component {
             id='S'
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
+            onDragStart={() => false} 
+       
           />
           <circle
             cx={this.position.d.x}
@@ -355,6 +375,8 @@ class ASDR extends React.Component {
             id='D'
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
+            onDragStart={() => false} 
+         
           />
           <circle
             cx={this.position.r.x}
@@ -366,9 +388,11 @@ class ASDR extends React.Component {
             id='R'
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
+            onDragStart={() => false} 
+        
           />
 
-          
+
 
 
         </svg>
