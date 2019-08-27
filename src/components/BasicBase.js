@@ -1,8 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 // import { TextButton, Dial } from 'react-nexusui';
-import { Container, Row, Col, Button, ButtonGroup } from 'react-bootstrap';
-import Tone, { Transport, Player, Part, Event } from 'tone';
+import { Slider } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import { Container, Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
+import Tone, { Transport } from 'tone';
 import AudioKeys from 'audiokeys';
 
 import { MusicRNN } from '@magenta/music';
@@ -12,7 +14,7 @@ import * as Chord from "tonal-chord";
 
 import * as api from '../api';
 import PianoLayout from './PianoLayout';
-import InfoDisplay from './InfoDisplay';
+// import InfoDisplay from './InfoDisplay';
 import ADSR from './ui-controllers/ADSR';
 import '../css/adsr.css';
 
@@ -32,6 +34,36 @@ export class BasePage extends React.Component {
       this.setState({ clientID: id })
     })
 
+    this.PrettoSlider = withStyles({
+      root: {
+        color: '#3888f5',
+        height: 8,
+      },
+      thumb: {
+        height: 24,
+        width: 24,
+        backgroundColor: '#fff',
+        border: '2px solid currentColor',
+        marginTop: -7,
+        marginLeft: -12,
+        '&:focus,&:hover,&$active': {
+          boxShadow: 'inherit',
+        },
+      },
+      active: {},
+      valueLabel: {
+        left: 'calc(-50% + 4px)',
+      },
+      track: {
+        height: 12,
+        borderRadius: 4,
+      },
+      rail: {
+        height: 8,
+        borderRadius: 4,
+      },
+    })(Slider);
+
 
     this.attack = 0.01;
     this.decay = 0.1;
@@ -40,9 +72,7 @@ export class BasePage extends React.Component {
 
     this.synth = new Tone.PolySynth(7, Tone.Synth, {
       "oscillator": {
-        "type": "fatsawtooth",
-        // "type": "triangle8",
-        // "type": "square",
+        "type": "square",
         "count": 1,
         "spread": 10,
       },
@@ -54,8 +84,6 @@ export class BasePage extends React.Component {
         "attackCurve": "linear"
       },
     }).toMaster();
-
-    // this.synth = new Tone.PolySynth(8, Tone['Synth']).toMaster();
 
     this.comp = new Tone.PolySynth(6, Tone.Synth, {
       "oscillator": {
@@ -73,8 +101,7 @@ export class BasePage extends React.Component {
     });
 
     this.melodiesIndex = 0;
-
-
+    this.nOfBars = 16;
 
     this.state = {
       loadingModel: true,
@@ -83,9 +110,15 @@ export class BasePage extends React.Component {
       muted: false,
       currentChord: [],
       synth: this.synth,
-
+      volume: -20
     }
-    this.nOfBars = 16;
+
+
+    this.synth.volume.value = -20;
+
+
+
+
 
     api.chordUpdate((chords) => {
       console.log('got chords');
@@ -105,39 +138,34 @@ export class BasePage extends React.Component {
         this.part.start();
       }
     })
-
   }
 
   componentWillUnmount = () => {
-    console.log('unmount');
     api.disconnectMe(this.state.isHost)
   }
 
   loadChordRNN = () => {
-    const modelCheckPoint = './checkpoints/chord_pitches_improv';
+    const modelCheckPoint = process.env.PUBLIC_URL + '/checkpoints/chord_pitches_improv';
     const model = new MusicRNN(modelCheckPoint);
     model.initialize()
       .then(() => {
-        console.log('chord model loaded!');
+        console.log('chord model loaded');
         this.setState({ loadingModel: false })
         this.model = model;
         api.announceModelReady();
       })
   }
 
-
   initChordRNN = (chordProgression) => {
-
     this.model.continueSequence(
       presetMelodies['Twinkle'],
       this.nOfBars * 16,
-      0.8, // Temp
+      this.state.temperature, // Temp
       chordProgression,
     ).then((i) => {
       this.setMelodies([i], chordProgression);
     });
   }
-
 
   setMelodies = (m, c) => {
 
@@ -152,8 +180,6 @@ export class BasePage extends React.Component {
         'chord': false,
       };
     });
-
-
 
     if (c) {
       this.chordProgression = c;
@@ -206,10 +232,25 @@ export class BasePage extends React.Component {
     this.part.loop = 1;
     this.part.loopEnd = `${this.nOfBars}:0:0`;
 
-    console.log(notes);
-    // this.part.start();
-
     api.announceNotesReady();
+  }
+
+  blurAll() {
+    var tmp = document.createElement("input");
+    document.body.appendChild(tmp);
+    tmp.focus();
+    document.body.removeChild(tmp);
+  }
+
+  oscTypeChange = (e) => {
+    this.synth.voices.forEach(voice => {
+      voice.oscillator.type = e.target.value;
+    })
+    let xOff = window.pageXOffset;
+    let yOff = window.pageYOffset
+
+    this.blurAll();
+    window.scrollTo(xOff, yOff);
   }
 
   generateOptions = () => {
@@ -275,8 +316,8 @@ export class BasePage extends React.Component {
         this.piano.toggleKey(note.note, true);
         // console.log(note.note, this.synth);
 
-        console.log(Tone.Frequency(note.note, "midi").toNote());
-        
+        // console.log(Tone.Frequency(note.note, "midi").toNote());
+
         this.synth.triggerAttack(Tone.Frequency(note.note, "midi").toNote());
       }
     });
@@ -284,8 +325,8 @@ export class BasePage extends React.Component {
     this.keyboard.up(note => {
       if (note.note >= 0 && note.note <= 120) {
         this.piano.toggleKey(note.note, false);
-        
-        
+
+
         this.synth.triggerRelease(Tone.Frequency(note.note, "midi").toNote());
       }
     });
@@ -334,83 +375,100 @@ export class BasePage extends React.Component {
     this.setState({ temperature: 1 })
   }
 
-
-  selectHost = () => {
-
-  }
+  handleSliderChange = (event, newValue) => {
+    this.setState({ volume: newValue })
+    this.synth.volume.value = newValue;
+  };
 
   ADSRChange = (updates) => {
-    
-    console.log(updates);
 
-    
     this.synth.voices.forEach(voice => {
       voice.envelope.attack = updates.attack;
       voice.envelope.decay = updates.decay;
       voice.envelope.sustain = updates.sustain;
       voice.envelope.release = updates.release;
-      // voice.volume.value = this.state.synthParams.genericSynth.volume - this.state.synthParams.genericSynth.ampMaxValPerc;
-    })   
+      voice.volume.value = this.state.volume - updates.ampMaxValPerc;
+    })
   }
 
   render() {
     return (
       <div className="App">
-
-        <Button as={NavLink} to="/host">Pick me as host</Button>
-        <h1>Player</h1>
-        {this.state.clientID && <h6>Connected. ClientID: {this.state.clientID}</h6>}
-
-
-        <p></p>
-
-
+        <Button style={{ 'position': 'absolute', 'top': '8px', 'right': '100px' }} as={NavLink} to="/host">Pick me as host</Button>
         <Container fluid={true} style={{ 'margin': '0' }}>
-        <Row>
-          <Col>
-            <Row noGutters={true} style={{ 'padding': '0 0 0.5em 0' }}>
-              <Button size='sm' variant="outline-primary" style={{ 'margin': '0 1em 0 1em' }} active={!this.state.muted} onClick={this.mute}>
-                {this.state.muted ? 'Muted' : 'Mute'}
-              </Button>
+          <Col style={{ 'maxWidth': '1000px', 'float': 'none', 'margin': '0 auto' }}>
+            <Row style={{ 'marginTop': '0.8em' }}>
+              <Col>
+                <h1 style={{ 'marginBottom': '0.5em' }}>Playing</h1>
+                {this.state.clientID && <h6>Connected <span role='img' aria-label='hang ten emoji'>&#x1F44C;</span> ClientID: {this.state.clientID}</h6>}
+                {!this.state.clientID && <h6>Not Connected <span role='img' aria-label='thumbs down emoji'>&#x1f44e;</span></h6>}
+                <hr />
+              </Col>
             </Row>
+            <Row>
+              <Col>
+                <Row style={{ 'paddingBottom': '0.8em' }}>
+                  <h6 style={{ 'margin': '0 1em 0 1em' }}>Volume: {this.state.volume} dB</h6>
+                  <this.PrettoSlider
+                    style={{ 'margin': '0 10em 0 1em' }}
+                    value={this.state.volume}
+                    onChange={this.handleSliderChange}
+                    max={0}
+                    min={-50}
+                  />
+                </Row>
+                <Row style={{ 'paddingBottom': '3em' }}>
+                  <Button size='sm' variant="outline-primary" style={{ 'margin': '0 1em 0 1.15em' }} active={!this.state.muted} onClick={this.mute}>
+                    {this.state.muted ? 'Muted' : 'Mute'}
+                  </Button>
+                </Row>
 
-            <Row noGutters={true} style={{ 'padding': '0 0 0.5em 0' }}>
-              <ButtonGroup size='sm' style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
-                <Button onClick={this.transposeReset} variant="secondary">Reset</Button>
-                <Button onClick={this.transposeUp} variant="secondary">+</Button>
-                <Button onClick={this.transposeDown} variant="secondary">-</Button>
-              </ButtonGroup>
-              <h6 >Transpose oct: {(this.state.transpose <= 0 ? "" : "+") + this.state.transpose}</h6>
+                <Row style={{ 'paddingBottom': '0.5em' }}>
+                  <ButtonGroup size='sm' style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
+                    <Button onClick={this.transposeReset} variant="secondary">Reset</Button>
+                    <Button onClick={this.transposeUp} variant="secondary">+</Button>
+                    <Button onClick={this.transposeDown} variant="secondary">-</Button>
+                  </ButtonGroup>
+                  <h6 style={{ 'paddingTop': '0.25em' }} >Transpose oct: {(this.state.transpose <= 0 ? "" : "+") + this.state.transpose}</h6>
 
+                </Row>
+                <Row style={{ 'paddingBottom': '0.5em' }}>
+                  <ButtonGroup size='sm' style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
+                    <Button onClick={this.tempReset} variant="secondary">Reset</Button>
+                    <Button onClick={this.tempUp} variant="secondary">+</Button>
+                    <Button onClick={this.tempDown} variant="secondary">-</Button>
+                  </ButtonGroup>
+                  <h6 style={{ 'paddingTop': '0.25em' }}>Temperature: {this.state.temperature}</h6>
+                </Row>
+              </Col>
+              <Col>
+                <Row >
+                  <Form.Label>Oscillator Type</Form.Label>
+                  <Form.Control
+                    as='select'
+                    onChange={this.oscTypeChange}
+
+                    style={{ 'width': '79%' }}
+                  >
+                    {this.generateOptions()}
+
+                  </Form.Control>
+                </Row>
+                <Row style={{ 'padding': '1em 0 1em 0' }}>
+
+                  <ADSR
+                    title='Amplitude Env'
+                    radius={15}
+                    onChange={this.ADSRChange}
+                  />
+                </Row>
+              </Col>
             </Row>
+            <Row noGutters={true}>
+              <p>Chord: {JSON.stringify(this.state.currentChord)}</p>
 
-            <Row noGutters={true} style={{ 'padding': '0 0 0.5em 0' }}>
-              <ButtonGroup size='sm' style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
-                <Button onClick={this.tempReset} variant="secondary">Reset</Button>
-                <Button onClick={this.tempUp} variant="secondary">+</Button>
-                <Button onClick={this.tempDown} variant="secondary">-</Button>
-              </ButtonGroup>
-              <h6>Temperature: {this.state.temperature}</h6>
             </Row>
           </Col>
-          <Col>
-            <Row style={{ 'padding': '0 0 1em 0' }}>
-              
-              <ADSR
-              title='Amplitude Env'
-              radius={15}
-              onChange={this.ADSRChange}
-            />
-            </Row>
-          </Col>
-      </Row>
-        </Container>
-
-        <Container style={{ 'padding': '0' }} fluid={true}>
-          <Row noGutters={true}>
-            <p>Chord: {JSON.stringify(this.state.currentChord)}</p>
-            
-          </Row>
         </Container>
 
         <PianoLayout keysReady={this.initPiano} playPiano={this.playPiano} />

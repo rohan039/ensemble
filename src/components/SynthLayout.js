@@ -1,6 +1,6 @@
 import React from 'react';
 // import { connect } from 'react-redux';
-import { Select } from 'react-nexusui';
+// import { Select } from 'react-nexusui';
 import { Form } from 'react-bootstrap';
 import PluckSynth from './synths/PluckSynth';
 import AMSynth from './synths/AMSynth';
@@ -16,18 +16,18 @@ import BasicSynth from './synths/BasicSynth';
 
 const SynthLayout = (props) => {
 
-  const synthOptions = [
-    'Choose',
-    'AM Synth',
-    'Duo Synth',
-    'FM Synth',
-    'Membrane Synth',
-    'Metal Synth',
-    'Mono Synth',
-    'Noise Synth',
-    'Pluck Synth',
-    'Generic Synth'
-  ];
+  // const synthOptions = [
+  //   'Choose',
+  //   'AM Synth',
+  //   'Duo Synth',
+  //   'FM Synth',
+  //   'Membrane Synth',
+  //   'Metal Synth',
+  //   'Mono Synth',
+  //   'Noise Synth',
+  //   'Pluck Synth',
+  //   'Generic Synth'
+  // ];
 
   let selectedSynth = null;
   switch (props.activeSynth) {

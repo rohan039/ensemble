@@ -6,7 +6,6 @@ import AppRouter, { history } from './routers/AppRouter';
 import configureStore from './store/configureStore';
 import * as serviceWorker from './serviceWorker';
 
-
 const store = configureStore();
 const jsx = (
   <Provider store={store}>

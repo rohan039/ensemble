@@ -190,7 +190,7 @@ export class BasePage extends React.Component {
       if (v.state && this.state.synth) {
 
         if (this.state.activeSynth === "metalSynth" ||
-          this.state.activeSynth == "noiseSynth"
+          this.state.activeSynth === "noiseSynth"
         ) {
           this.state.synth.triggerAttack();
         } else {

@@ -2,13 +2,13 @@ import React from 'react';
 
 import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import { MusicRNN } from '@magenta/music';
-import { presetMelodies } from '../utils/clips';
+// import { MusicRNN } from '@magenta/music';
+// import { presetMelodies } from '../utils/clips';
 
 import * as api from '../api';
-import * as Tone from 'tone';
+// import * as Tone from 'tone';
 import AudioKeys from 'audiokeys';
-import PianoLayout from './PianoLayout';
+// import PianoLayout from './PianoLayout';
 import InfoDisplay from './InfoDisplay';
 
 const chordProgressions = [
@@ -207,8 +207,8 @@ export class HostPage extends React.Component {
                     } else {
                       return <ListGroup.Item key={client}>{client}</ListGroup.Item>
                     }
-                    
                   }
+                  return null;
                 })}
                 {(!this.state.clients || this.state.clients.length === 1) &&
                   <ListGroup.Item>No clients connected</ListGroup.Item>}

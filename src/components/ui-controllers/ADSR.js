@@ -314,7 +314,7 @@ class ASDR extends React.PureComponent {
   render() {
     return (
       <div>
-        <h4>{this.props.title}</h4>
+        <h4 style={{ 'paddingBottom': '1em'}}>{this.props.title}</h4>
         <svg className="svgClass" width="400" height="250">
 
           <rect x="0" y="0" width="400" height="230" fill={this.borderFill} />

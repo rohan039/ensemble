@@ -5,7 +5,7 @@ import * as createHistory from "history";
 import PublicRoute from './PublicRoute';
 // import AdminRoute from './AdminRoute';
 
-import BasePage from '../components/BasePage';
+// import BasePage from '../components/BasePage';
 import BasicBase from '../components/BasicBase';
 import HostPage from '../components/HostPage';
 

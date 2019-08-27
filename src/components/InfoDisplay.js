@@ -1,10 +1,10 @@
 import React from 'react';
 // import { subscribeToSongInfo } from '../api';
-import PianoLayout from './PianoLayout';
-import * as Tone from 'tone';
-import * as mm from '@magenta/music'
+// import PianoLayout from './PianoLayout';
+// import * as Tone from 'tone';
+// import * as mm from '@magenta/music'
 
-var blues = [0, 3, 5, 6, 7, 10, 12];
+
 
 // var TWINKLE_TWINKLE = {
 //   notes: [
@@ -59,16 +59,16 @@ export class InfoDisplay extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.synth = new Tone.PolySynth().toMaster();
-    this.soloSynth1 = new Tone.Synth().toMaster();
-    this.soloSynth2 = new Tone.Synth().toMaster();
+    // this.synth = new Tone.PolySynth().toMaster();
+    // this.soloSynth1 = new Tone.Synth().toMaster();
+    // this.soloSynth2 = new Tone.Synth().toMaster();
 
     
     
     
     
-    Tone.Master.volume.value = -20;
-    Tone.Transport.bpm.value = 113;
+    // Tone.Master.volume.value = -20;
+    // Tone.Transport.bpm.value = 113;
     
     // subscribeToSongInfo((err, songInfo) => {
 
