@@ -114,7 +114,7 @@ export class BasePage extends React.Component {
   }
 
   loadChordRNN = () => {
-    const modelCheckPoint = '../checkpoints/chord_pitches_improv';
+    const modelCheckPoint = './checkpoints/chord_pitches_improv';
     const model = new MusicRNN(modelCheckPoint);
     model.initialize()
       .then(() => {
