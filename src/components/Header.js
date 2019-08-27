@@ -8,7 +8,7 @@ import { Navbar, NavDropdown, Nav } from 'react-bootstrap';
 export const Header = ({ startLogout }) => (
   <div>
     <Navbar bg="dark" variant="dark" expand="md">
-      <Navbar.Brand href="#home">Working Title</Navbar.Brand>
+      <Navbar.Brand href="#home">&#x1F3B9; </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">

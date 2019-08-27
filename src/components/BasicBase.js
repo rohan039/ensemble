@@ -114,7 +114,8 @@ export class BasePage extends React.Component {
   }
 
   loadChordRNN = () => {
-    const model = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv');
+    const modelCheckPoint = '../checkpoints/chord_pitches_improv';
+    const model = new MusicRNN(modelCheckPoint);
     model.initialize()
       .then(() => {
         console.log('chord model loaded!');
@@ -348,7 +349,7 @@ export class BasePage extends React.Component {
       voice.envelope.decay = updates.decay;
       voice.envelope.sustain = updates.sustain;
       voice.envelope.release = updates.release;
-
+      // voice.volume.value = this.state.synthParams.genericSynth.volume - this.state.synthParams.genericSynth.ampMaxValPerc;
     })   
   }
 
@@ -367,29 +368,29 @@ export class BasePage extends React.Component {
         <Container fluid={true} style={{ 'margin': '0' }}>
         <Row>
           <Col>
-            <Row noGutters={true} style={{ 'padding': '0 0 1em 0' }}>
-              <Button variant="outline-primary" style={{ 'margin': '0 1em 0 1em' }} active={!this.state.muted} onClick={this.mute}>
+            <Row noGutters={true} style={{ 'padding': '0 0 0.5em 0' }}>
+              <Button size='sm' variant="outline-primary" style={{ 'margin': '0 1em 0 1em' }} active={!this.state.muted} onClick={this.mute}>
                 {this.state.muted ? 'Muted' : 'Mute'}
               </Button>
             </Row>
 
-            <Row noGutters={true} style={{ 'padding': '0 0 1em 0' }}>
-              <ButtonGroup style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
+            <Row noGutters={true} style={{ 'padding': '0 0 0.5em 0' }}>
+              <ButtonGroup size='sm' style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
                 <Button onClick={this.transposeReset} variant="secondary">Reset</Button>
                 <Button onClick={this.transposeUp} variant="secondary">+</Button>
                 <Button onClick={this.transposeDown} variant="secondary">-</Button>
               </ButtonGroup>
-              <h4 >Transpose oct: {(this.state.transpose <= 0 ? "" : "+") + this.state.transpose}</h4>
+              <h6 >Transpose oct: {(this.state.transpose <= 0 ? "" : "+") + this.state.transpose}</h6>
 
             </Row>
 
-            <Row noGutters={true} style={{ 'padding': '0 0 1em 0' }}>
-              <ButtonGroup style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
+            <Row noGutters={true} style={{ 'padding': '0 0 0.5em 0' }}>
+              <ButtonGroup size='sm' style={{ 'padding': '0 1em 0 1em' }} aria-label="Basic example">
                 <Button onClick={this.tempReset} variant="secondary">Reset</Button>
                 <Button onClick={this.tempUp} variant="secondary">+</Button>
                 <Button onClick={this.tempDown} variant="secondary">-</Button>
               </ButtonGroup>
-              <h4  >Temperature: {this.state.temperature}</h4>
+              <h6>Temperature: {this.state.temperature}</h6>
             </Row>
           </Col>
           <Col>

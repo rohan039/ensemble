@@ -146,7 +146,7 @@ export class HostPage extends React.Component {
 
   sendChords = () => {
 
-    if (this.state.readyModelClients.length > 2) {
+    if (this.state.readyModelClients.length > 0) {
       api.sendChords(chordProgressions[2])
       this.setState({ startError: false, showChords: true })
     } else {
@@ -178,8 +178,8 @@ export class HostPage extends React.Component {
                   {this.state.showChords && <p>Sending 16 bars of chords: <br/> C, Am, F, G, C, F, G, C,
                   C, Am, F, G, C, F, G, C, </p>}
 
-                  {this.state.readyModelClients.length > 2 && <Button onClick={this.sendChords}>Send Chords</Button>}
-                  {this.state.readyNotesClients.length > 2 && <Button variant="success" onClick={this.start}>Start</Button>}
+                  {this.state.readyModelClients.length > 0 && <Button onClick={this.sendChords}>Send Chords</Button>}
+                  {this.state.readyNotesClients.length > 0 && <Button variant="success" onClick={this.start}>Start</Button>}
                   
                   {this.state.startError && <p> Either all clients are not ready or less than 3 are connected and ready</p>}
                 </div>
