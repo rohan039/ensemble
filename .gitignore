@@ -10,7 +10,7 @@
 
 # production
 /build
-/src/checkpoints
+/src/checkpoints/
 
 # misc
 .DS_Store
