@@ -4,12 +4,12 @@ import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 // import { MusicRNN } from '@magenta/music';
 // import { presetMelodies } from '../utils/clips';
-
+import { Slider } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 import * as api from '../api';
 // import * as Tone from 'tone';
 import AudioKeys from 'audiokeys';
 // import PianoLayout from './PianoLayout';
-import InfoDisplay from './InfoDisplay';
 
 const chordProgressions = [
   [
@@ -47,11 +47,41 @@ export class HostPage extends React.Component {
       readyModelClients: [],
       readyNotesClients: [],
       connections: [],
-      showChords: false
+      showChords: false,
+      bpm: 110
     }
 
     this.nOfBars = 8;
 
+    this.PrettoSlider = withStyles({
+      root: {
+        color: '#3888f5',
+        height: 8,
+      },
+      thumb: {
+        height: 24,
+        width: 24,
+        backgroundColor: '#fff',
+        border: '2px solid currentColor',
+        marginTop: -7,
+        marginLeft: -12,
+        '&:focus,&:hover,&$active': {
+          boxShadow: 'inherit',
+        },
+      },
+      active: {},
+      valueLabel: {
+        left: 'calc(-50% + 4px)',
+      },
+      track: {
+        height: 12,
+        borderRadius: 4,
+      },
+      rail: {
+        height: 8,
+        borderRadius: 4,
+      },
+    })(Slider);
 
     api.openConnection();
 
@@ -147,13 +177,17 @@ export class HostPage extends React.Component {
   sendChords = () => {
 
     if (this.state.readyModelClients.length > 0) {
-      api.sendChords(chordProgressions[2])
+      api.sendChords(chordProgressions[1], this.state.bpm)
       this.setState({ startError: false, showChords: true })
     } else {
       this.setState({ startError: true })
     }
 
   }
+
+  handleBPMSliderChange = (event, newValue) => {
+    this.setState({ bpm: newValue })
+  };
 
   start = () => {
     api.tellStart();
@@ -162,19 +196,26 @@ export class HostPage extends React.Component {
   render() {
     return (
       <div className="App">
-        <h1>Conductor</h1>
+        <h1 style={{ 'margin': '0.4em 0em 0 0.3em' }}>Conductor</h1>
+        <hr/>
         <Container fluid={true}>
           <Row noGutters={true}>
             <Col>
               {this.state.isHost &&
                 <div>
-                  <h2>
+                  <h2 >
                     You are the host
               </h2>
-                  {this.state.clients && <p>{this.state.clients.length - 1} clients connected.</p>}
+                  {this.state.clients && <p>{this.state.clients.length - 1} client(s) connected.</p>}
 
-                  
-                  <InfoDisplay />
+                  <h6 style={{ 'margin': '0 1em 0 0em' }}>BPM: {this.state.bpm}</h6>
+                  <this.PrettoSlider
+                    style={{ 'margin': '0 1em 1em 0em', 'width': '80%' }}
+                    value={this.state.bpm}
+                    onChange={this.handleBPMSliderChange}
+                    max={140}
+                    min={80}
+                  />
                   {this.state.showChords && <p>Sending 16 bars of chords: <br/> C, Am, F, G, C, F, G, C,
                   C, Am, F, G, C, F, G, C, </p>}
 
@@ -185,7 +226,7 @@ export class HostPage extends React.Component {
                 </div>
 
               }
-
+             
               {!this.state.isHost &&
                 <div>
                   <h2>

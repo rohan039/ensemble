@@ -2,21 +2,21 @@ import openSocket from 'socket.io-client';
 var socket;
 
 function openConnection(cb) {
-  socket = openSocket('http://localhost:8000');
+  socket = openSocket('http://'+document.location.hostname+':8000');
 }
 
 function getID(cb) {
-  socket.on('getID', myID => {
-    cb(myID)
+  socket.on('getID', (myID, num) => {
+    cb(myID, num)
   })
 }
 
-function subscribeToSongInfo(cb) {
+function subscribeToTime(cb) {
   // socket.on('timer', timestamp => cb(null, timestamp));
-  socket.on('songInfoUpdate', songInfo => {
-    cb(null, songInfo)
+  socket.on('timeUpdate', time => {
+    cb(null, time)
   });
-  socket.emit('subscribeToSongInfo');
+  socket.emit('subscribeToTime');
 }
 
 function subscribeToHostUpdates(cb) {
@@ -30,8 +30,8 @@ function subscribeToHostUpdates(cb) {
 }
 
 function chordUpdate(cb) {
-  socket.on('chordUpdate', (chords) => {
-    cb(chords)
+  socket.on('chordUpdate', (chords, bpm) => {    
+    cb(chords.concat(chords), bpm)
   })
 }
 
@@ -46,7 +46,6 @@ function announceNotesReady() {
 function startPlaying(cb) {
   socket.on('startPlaying', () => {
     console.log('start now');
-    
     cb(true)
   })
 }
@@ -94,8 +93,8 @@ function hostSuccess(cb) {
   })
 }
 
-function sendChords(chords) {
-  socket.emit('initChords', chords);
+function sendChords(chords, bpm) {
+  socket.emit('initChords', chords, bpm);
 }
 
 function clientUpdates(cb) {
@@ -110,7 +109,7 @@ function disconnectMe() {
 
 export { 
   getID,
-  subscribeToSongInfo, 
+  subscribeToTime, 
   hostSuccess, connectHost, subscribeToHostUpdates, 
   disconnectMe, openConnection, clientUpdates,
   sendChords, chordUpdate,
