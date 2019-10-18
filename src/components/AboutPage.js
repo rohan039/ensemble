@@ -6,16 +6,6 @@ import '../css/adsr.css';
 
 export class BasePage extends React.Component {
 
-  // TODO
-  // Improv RNN https://github.com/tensorflow/magenta/tree/master/magenta/models/improv_rnn
-  // Drums https://github.com/tensorflow/magenta/tree/master/magenta/models/drums_rnn
-  // 
-
-  
-
-    
-  // 192.168.20.64
-
   render() {
     return (
       <div className="App">
@@ -29,7 +19,8 @@ export class BasePage extends React.Component {
             </Row>
             <Row>
               <Col>
-               <p> This is the about page, information about what this is goes here</p>
+                
+               <p>TODO: Provide some background once I've written it in my thesis.</p>
               </Col>
               
               

@@ -1,6 +1,11 @@
+/* 
+  Rohan Proctor 2019
+  First Iteration of the design of the app, abandoned in an effort to 
+  simplify/streamline the functionality and interface once a better 
+  idea of what was needed for performances.
+*/
+
 import React from 'react';
-// import { NavLink } from 'react-router-dom';
-// import { TextButton, Dial } from 'react-nexusui';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import * as Tone from 'tone';
 import AudioKeys from 'audiokeys';

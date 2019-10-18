@@ -1,32 +1,21 @@
+// Rohan Proctor 2019
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-// import { TextButton, Dial } from 'react-nexusui';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { Container, Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
 import Tone, { Transport } from 'tone';
 import AudioKeys from 'audiokeys';
-
 import { MusicRNN } from '@magenta/music';
 import { presetMelodies } from '../utils/clips';
-
 import * as Chord from "tonal-chord";
 import * as api from '../api';
 import PianoLayout from './PianoLayout';
-// import InfoDisplay from './InfoDisplay';
 import ADSR from './ui-controllers/ADSR';
 import '../css/adsr.css';
 
 export class BasePage extends React.Component {
-
-  // TODO
-  // Improv RNN https://github.com/tensorflow/magenta/tree/master/magenta/models/improv_rnn
-  // Drums https://github.com/tensorflow/magenta/tree/master/magenta/models/drums_rnn
-
-
-  // Score info
-  // How long is left?
-  // fiddle around with the osc types and ADSR
 
   constructor(props) {
     super(props);
@@ -36,13 +25,10 @@ export class BasePage extends React.Component {
       this.num = num;
       this.setState({ clientID: id, num, statusMessage: 'connected successfully' })
 
-      //stagger this for each player
-      // assume 2, want melody to be generated before 16th bar
-      for (let i = 0; i < 3; i++) {
-
+      for (let i = 0; i < 9; i++) {
         Transport.schedule((time) => {
           console.log('loading at time ', time);
-          
+
           this.setState({ statusMessage: `Thread Busy, constructing new melody` })
           this.model.continueSequence(
             this.melodies[this.melodies.length - 1],
@@ -54,7 +40,7 @@ export class BasePage extends React.Component {
             this.setState({ statusMessage: `added new melody ${this.melodiesIndex}` })
             console.log('melodies index', this.melodiesIndex);
           })
-        }, `${(16 - this.num*3) * (i + 1)}:0:0`);
+        }, `${(16 - this.num * 3) * (i + 1)}:0:0`);
 
       }
     })
@@ -138,8 +124,6 @@ export class BasePage extends React.Component {
       }
     }).toMaster();
 
-
-
     this.keyboard = new AudioKeys({
       polyphony: 8,
       rows: 1,
@@ -171,10 +155,14 @@ export class BasePage extends React.Component {
     this.synth.volume.value = -20;
     this.comp.volume.value = -20;
 
-    // MIDI
-    // https://codepen.io/Rumyra/pen/NxdbzL
+    /*
+      MIDI Interface helper
+      Adopted from: https://codepen.io/Rumyra/pen/NxdbzL
+      Original Author: Ruth John
 
-    // start talking to MIDI controller
+      MIT Licence
+    */
+
     if (navigator.requestMIDIAccess) {
       navigator
         .requestMIDIAccess({
@@ -213,38 +201,34 @@ export class BasePage extends React.Component {
 
         this.setState({ statusMessage: `Playing Notes` })
         Transport.start();
+
+        // Hardcoded end after 96th bar 
+        // roughly 3.5min at 110bpm
+        Transport.schedule((time) => {
+          Transport.stop()
+          console.log('stop');
+
+        }, '96:0:0');
       }
     })
-
-
-
   }
 
-  // Stagger when new chrods are generated
-  // Assign numeric id to each client to so this
-  // Fix the ending time as a result (just stop transport at x time)
-  // Fix the Transport position via a shared seconds clock count broadcast from the server
-  // lmao javascript
-
-  // on success
   onMIDISuccess = (midiData) => {
-    // this is all our MIDI data
     this.midi = midiData;
     let allInputs = this.midi.inputs.values();
-    // loop over all available inputs and listen for any MIDI input
+
     for (
       let input = allInputs.next();
       input && !input.done;
       input = allInputs.next()
     ) {
-      // when a MIDI value is received call the onMIDIMessage function
+
       input.value.onmidimessage = this.gotMIDImessage;
     }
   }
-  // var dataList = document.querySelector('#midi-data ul')
 
   onMIDIFailure = () => {
-    console.warn("Not recognising MIDI controller");
+    console.warn("Problemo: MIDI controller not recognised");
   }
 
   gotMIDImessage = (messageData) => {
@@ -323,7 +307,6 @@ export class BasePage extends React.Component {
       };
     });
 
-    // add chrod progression to notes section
     if (chordProg) {
       this.chordProgression = chordProg;
       const chordNotes = this.chordProgression.map((chord, i) => {
@@ -346,7 +329,6 @@ export class BasePage extends React.Component {
       console.log('heloooo', Transport.position)
     }, `${this.melodiesIndex * 16}:0:0`);
 
-
     this.melodiesIndex++;
 
     if (this.melodiesIndex === 2 && !this.state.sentReady) {
@@ -357,8 +339,6 @@ export class BasePage extends React.Component {
 
   createPart(notes) {
     let part = new Tone.Part((time, value) => {
-
-      // console.log(Transport.position, Transport.ticks);
 
       if (!value.chord) {
         if (this.state.playAINotes) {
@@ -390,10 +370,6 @@ export class BasePage extends React.Component {
       }
 
     }, notes);
-
-    // // part.loop = 1;
-    // // part.loopStart = `${this.nOfBars * this.melodiesIndex}:0:0`;
-    // // part.loopEnd = `${this.nOfBars * (this.melodiesIndex + 1)}:0:0`;
 
     part.humanize = true;
     return part;
@@ -429,8 +405,6 @@ export class BasePage extends React.Component {
 
   initPiano = (piano) => {
 
-    // piano.colorize("accent", "#a3ffbc");
-    // piano.colorize("fill", "#a3ffbc");
     this.piano = piano;
     this.piano.on("change", v => {
 
@@ -484,7 +458,7 @@ export class BasePage extends React.Component {
   }
 
   tempUp = () => {
-    if (this.state.temperature < 2) {
+    if (this.state.temperature < 1.5) {
       this.setState({ temperature: Math.round((this.state.temperature + 0.1) * 10) / 10 })
     }
   }
@@ -539,7 +513,7 @@ export class BasePage extends React.Component {
   render() {
     return (
       <div className="App">
-        <Button style={{ 'position': 'absolute', 'top': '8px', 'right': '100px' }} as={NavLink} to="/host">Pick me as host</Button>
+        <Button style={{ 'position': 'absolute', 'top': '8px', 'right': '8px' }} as={NavLink} to="/host">Pick me as host</Button>
         <Container fluid={true} style={{ 'margin': '0' }}>
           <Col style={{ 'maxWidth': '1000px', 'float': 'none', 'margin': '0 auto' }}>
             <Row style={{ 'marginTop': '0.8em' }}>
@@ -551,8 +525,9 @@ export class BasePage extends React.Component {
                 <hr />
               </Col>
               <Col>
-                <p>State: {this.state.timeInfo}</p>
-                <p>Transport: {Transport.seconds}</p>
+                <p>Time (sec): {this.state.timeInfo}</p>
+                <p>Tone Transport: {Transport.position}</p>
+                <p>(Bars:Beats:Sixteenths)</p>
               </Col>
             </Row>
             <Row>
@@ -590,13 +565,10 @@ export class BasePage extends React.Component {
                   </ButtonGroup>
                   <h6 style={{ 'paddingTop': '0.25em' }}>Temperature: {this.state.temperature}</h6>
                 </Row>
-
                 <Row style={{ 'paddingTop': '3em' }}>
                   <Button size='sm' variant="outline-primary" style={{ 'margin': '0 1em 0 1.15em' }} active={this.state.playChord} onClick={this.handlePlayChord}>
                     {this.state.playChord ? 'Stop playing chord' : 'Play chords'}
                   </Button>
-
-
                 </Row>
                 {this.state.playChord &&
                   <Row>
@@ -624,16 +596,13 @@ export class BasePage extends React.Component {
                     value={this.state.pickedSynth}
                   >
                     {this.generateOptions()}
-
                   </Form.Control>
                 </Row>
                 <Row style={{ 'padding': '1em 0 1em 0' }}>
-
                   <ADSR
                     title='Amplitude Env'
                     radius={15}
                     onChange={this.ADSRChange}
-
                   />
                 </Row>
               </Col>
@@ -646,14 +615,20 @@ export class BasePage extends React.Component {
                 </div>
               </Row>
             }
-
             <Row noGutters={true}>
               <p>Chord: {JSON.stringify(this.state.currentChord)}</p>
             </Row>
           </Col>
         </Container>
-
         <PianoLayout keysReady={this.initPiano} playPiano={this.playPiano} />
+        <Container>
+          <Row style={{ 'marginTop': '13em' }}>
+            <h6>Performance Notes</h6>
+          </Row>
+          <Row style={{ 'marginTop': '0' }}>
+            <p>Section for reference while performing.</p>
+          </Row>
+        </Container>
       </div>
     )
   }

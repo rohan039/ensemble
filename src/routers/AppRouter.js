@@ -11,9 +11,7 @@ import HostPage from '../components/HostPage';
 import AboutPage from '../components/AboutPage';
 
 export const history = createHistory.createBrowserHistory();
-// export const history = createHistory();
 
-// <Route component={NotFoundPage} />
 const AppRouter = () => (
   <Router history={history}>
     <div>

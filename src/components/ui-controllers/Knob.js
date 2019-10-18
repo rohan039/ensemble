@@ -1,5 +1,11 @@
-// https://codepen.io/bbx/pen/QBKYOy
+/*
+  Modified implementation of a react knob component from:
 
+  https://codepen.io/bbx/pen/QBKYOy
+
+  Original Author: Daniel Subat
+  MIT Licence
+*/
 import React from 'react';
 import '../../css/knob.css';
 

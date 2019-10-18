@@ -5,6 +5,8 @@ function openConnection(cb) {
   socket = openSocket('http://'+document.location.hostname+':8000');
 }
 
+//////// CLIENT
+
 function getID(cb) {
   socket.on('getID', (myID, num) => {
     cb(myID, num)
@@ -12,7 +14,6 @@ function getID(cb) {
 }
 
 function subscribeToTime(cb) {
-  // socket.on('timer', timestamp => cb(null, timestamp));
   socket.on('timeUpdate', time => {
     cb(null, time)
   });
@@ -51,7 +52,7 @@ function startPlaying(cb) {
 }
 
 
-/// HOST
+//////// HOST
 
 function tellStart() {
   socket.emit('initPlaying')

@@ -1,3 +1,5 @@
+// Component for displaying musical info, not used in final implementation
+
 import React from 'react';
 // import { subscribeToSongInfo } from '../api';
 // import PianoLayout from './PianoLayout';
@@ -147,7 +149,6 @@ export class InfoDisplay extends React.PureComponent {
   render() {
     return (
       <div>
-      
         <p>Info Display</p>
         <p>
           Beat: {this.state.songInfo.beat}
@@ -158,7 +159,6 @@ export class InfoDisplay extends React.PureComponent {
         <p>
           Chord: {this.chord}
         </p>
-    
       </div>
     )
   }

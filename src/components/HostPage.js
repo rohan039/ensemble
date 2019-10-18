@@ -2,32 +2,17 @@ import React from 'react';
 
 import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-// import { MusicRNN } from '@magenta/music';
-// import { presetMelodies } from '../utils/clips';
+
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import * as api from '../api';
-// import * as Tone from 'tone';
-import AudioKeys from 'audiokeys';
-// import PianoLayout from './PianoLayout';
 
-const chordProgressions = [
-  [
-    'C', 'Am', 'F', 'G',
-    'C', 'F', 'G', 'C',
-  ],
-  [
-    'C', 'Am', 'F', 'G',
-    'C', 'F', 'G', 'C',
-    // 'C', 'Am', 'F', 'G',
-    // 'C', 'F', 'G', 'C',
-  ],
-  [
-    'C', 'Am', 'F', 'G',
-    'C', 'F', 'G', 'C',
-    'C', 'Am', 'F', 'G',
-    'C', 'F', 'G', 'C',
-  ],
+import AudioKeys from 'audiokeys';
+
+
+const chordProgression = [
+  'C', 'Am', 'F', 'G',
+  'C', 'F', 'G', 'C',
 ];
 
 export class HostPage extends React.Component {
@@ -115,7 +100,7 @@ export class HostPage extends React.Component {
       this.setState({ readyModelClients: clients })
     })
 
-    api.getClientsNotesReady(clients => {  
+    api.getClientsNotesReady(clients => {
       this.setState({ readyNotesClients: clients })
     })
 
@@ -177,7 +162,7 @@ export class HostPage extends React.Component {
   sendChords = () => {
 
     if (this.state.readyModelClients.length > 0) {
-      api.sendChords(chordProgressions[1], this.state.bpm)
+      api.sendChords(chordProgression, this.state.bpm)
       this.setState({ startError: false, showChords: true })
     } else {
       this.setState({ startError: true })
@@ -197,7 +182,7 @@ export class HostPage extends React.Component {
     return (
       <div className="App">
         <h1 style={{ 'margin': '0.4em 0em 0 0.3em' }}>Conductor</h1>
-        <hr/>
+        <hr />
         <Container fluid={true}>
           <Row noGutters={true}>
             <Col>
@@ -216,17 +201,17 @@ export class HostPage extends React.Component {
                     max={140}
                     min={80}
                   />
-                  {this.state.showChords && <p>Sending 16 bars of chords: <br/> C, Am, F, G, C, F, G, C,
+                  {this.state.showChords && <p>Sending 16 bars of chords: <br /> C, Am, F, G, C, F, G, C,
                   C, Am, F, G, C, F, G, C, </p>}
 
                   {this.state.readyModelClients.length > 0 && <Button onClick={this.sendChords}>Send Chords</Button>}
                   {this.state.readyNotesClients.length > 0 && <Button variant="success" onClick={this.start}>Start</Button>}
-                  
+
                   {this.state.startError && <p> Either all clients are not ready or less than 3 are connected and ready</p>}
                 </div>
 
               }
-             
+
               {!this.state.isHost &&
                 <div>
                   <h2>

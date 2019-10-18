@@ -1,3 +1,11 @@
+/*
+  Modified implementation of a react knob component from:
+
+  https://codepen.io/bbx/pen/QBKYOy
+
+  Original Author: Daniel Subat
+  MIT Licence
+*/
 
 .knob {
   display: flex;
@@ -33,8 +41,6 @@
   bottom: 2%;
   left: 50%;
   transform: translateX(-50%);
-  /* border-radius: 50%; */
   border: 1px solid white;
   background: #ffffff;
-  /* box-shadow: 0 0 3px 1px black; */
 }

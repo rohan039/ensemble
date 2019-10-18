@@ -259,54 +259,6 @@ class ASDR extends React.PureComponent {
     return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
   }
 
-  // mapValsToPos = (vals) => {
-  //   let ampMaxValPerc = 1 - this.map_range(vals[], 0, -50, 4, 200, );
-
-  //   if (ampMaxValPerc < 0) ampMaxValPerc = 0;
-  //   // A range
-  //   // Input 0 - D.x
-  //   // Output 0 - 7
-
-  //   let attack = this.map_range(
-  //     Math.pow(pos.a.x, 2),
-  //     0, Math.pow(pos.d.x, 2),
-  //     0, 7);
-
-  //   // D range
-  //   // A.x - 300
-  //   // Output 0 - 7
-
-  //   let decay = this.map_range(
-  //     Math.pow(pos.d.x, 2),
-  //     Math.pow(pos.a.x, 2), Math.pow(300, 2),
-  //     0, 7
-  //   );
-
-  //   // decay = decay - attack;
-  //   // S range
-  //   // in: 0 - 200
-  //   // out: 0 - 100%
-
-  //   //linear map
-  //   let sustain = this.map_range(pos.s.y, 0, 200, 1, 0);
-
-  //   // R Range 
-  //   // Input 300 - 400
-  //   // Output 0 - 20
-  //   let release = this.map_range(
-
-  //     Math.pow((pos.r.x - 300), 2),
-  //     0, Math.pow(100, 2),
-  //     0, 20
-  //   );
-
-  //   this.values = {
-  //     ampMaxValPerc, attack, decay, sustain, release
-  //   }
-
-  //   return this.values;
-  // }
-
   mapPosToVals = (pos) => {
     let ampMaxValPerc = 1 - this.map_range(pos.a.y, 4, 200, 0, -50);
 
