@@ -1,4 +1,4 @@
-## A Live Performance Assistance for Laptop Orchestras
+## A Live Performance Assistance Tool for Laptop Orchestras
 
 Created for my thesis at the Australian National University.
 
@@ -22,7 +22,7 @@ Duplicate the client tab in your web browser and select a host by clicking the '
 
 The create-react-app CLI will provide you with the IP address the app is being served on. From `localhost:3000`, select the 'pick me as host button' in the top right of the performer client screen. After loading the host page, get all ensemble members to load the IP address in their web browser (tested on Chrome and Firefox). 
 
-You will be able to see each performer client connect with the initialisation status of their local Magenta.js RNN models. Once all models are loaded, press the 'send chords' button and wait for all performers' clients to report the successful generation of the first note sequences. Once all clients are green (good to go), press the 'start' button to begin playing the piece.
+You will be able to see each performer client connect with the initialisation status of their local [Magenta.js](https://magenta.tensorflow.org/) RNN models. Once all models are loaded, press the 'send chords' button and wait for all performers' clients to report the successful generation of the first note sequences. Once all clients are green (good to go), press the 'start' button to begin playing the piece.
 
 Note: the connection, initialisation and first round of generation procedure might require a few rounds of refreshing all clients if performed over a network. The app is stable however connections can be prone to drop for various reasons (to be fixed).
 
