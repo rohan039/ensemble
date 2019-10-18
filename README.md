@@ -10,7 +10,7 @@ Created for my thesis at the Australian National University.
 4. First window
     1. run `node src/server/server.js`
 5. Second window
-    1. run `npm start' or 'yarn start`
+    1. run `npm start` or `yarn start`
 
 From here you should have both a performer client running and the server listening on port 8000. 
 
