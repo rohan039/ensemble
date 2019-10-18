@@ -14,7 +14,7 @@ Created for my thesis at the Australian National University.
 
 From here you should have both a performer client running and the server listening on port 8000. 
 
-#### If you are running this on an individual computer:
+#### If you are running this on an single computer:
 
 Duplicate the client tab in your web browser and select a host by clicking the 'pick me as host' button in the top right of screen. Duplicate more performer client tabs to simulate additional performers in the ensemble.
 
