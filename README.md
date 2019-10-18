@@ -1,6 +1,6 @@
 ## A Live Performance Assistance Tool for Laptop Orchestras
 
-Created for my thesis at the Australian National University.
+Rohan Proctor 2019. Created for my thesis at the Australian National University.
 
 ## Instructions for Use
 
