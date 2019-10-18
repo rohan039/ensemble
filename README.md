@@ -5,12 +5,12 @@ Created for my thesis at the Australian National University.
 ## Instructions for Use
 
 1. Clone the repo
-2. In the base directory, run 'npm install' or 'yarn install'
+2. In the base directory, run `npm install` or `yarn install`
 3. Open two terminal windows both at the base directory
 4. First window
-    1. run 'node src/server/server.js'
+    1. run `node src/server/server.js`
 5. Second window
-    1. run 'npm start' or 'yarn start'
+    1. run `npm start' or 'yarn start`
 
 From here you should have both a performer client running and the server listening on port 8000. 
 
@@ -20,7 +20,7 @@ Duplicate the client tab in your web browser and select a host by clicking the '
 
 #### If you are running this over a local area network:
 
-The create-react-app CLI will provide you with the IP address the app is being served on. From localhost:3000, select the 'pick me as host button' in the top right of the performer client screen. After loading the host page, get all ensemble members to load the IP address in their web browser (tested on Chrome and Firefox). 
+The create-react-app CLI will provide you with the IP address the app is being served on. From `localhost:3000`, select the 'pick me as host button' in the top right of the performer client screen. After loading the host page, get all ensemble members to load the IP address in their web browser (tested on Chrome and Firefox). 
 
 You will be able to see each performer client connect with the initialisation status of their local Magenta.js RNN models. Once all models are loaded, press the 'send chords' button and wait for all performers' clients to report the successful generation of the first note sequences. Once all clients are green (good to go), press the 'start' button to begin playing the piece.
 
