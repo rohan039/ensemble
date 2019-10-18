@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "thesis",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,14 +14,10 @@
     "react-bootstrap": "^1.0.0-beta.10",
     "react-dom": "^16.8.6",
     "react-nexusui": "^0.1.7",
-    "react-redux": "^7.1.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
-    "redux": "^4.0.4",
-    "redux-thunk": "^2.3.0",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
-    "svg.js": "^2.7.1",
     "tonal-chord": "^2.2.2",
     "tone": "^13.4.9"
   },
