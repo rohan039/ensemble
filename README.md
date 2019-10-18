@@ -24,7 +24,7 @@ The create-react-app CLI will provide you with the IP address the app is being s
 
 You will be able to see each performer client connect with the initialisation status of their local [Magenta.js](https://magenta.tensorflow.org/) RNN models. Once all models are loaded, press the 'send chords' button and wait for all performers' clients to report the successful generation of the first note sequences. Once all clients are green (good to go), press the 'start' button to begin playing the piece.
 
-Note: the connection, initialisation and first round of generation procedure might require a few rounds of refreshing all clients if performed over a network. The app is stable however connections can be prone to drop for various reasons (to be fixed).
+Note: the connection, initialisation and first round of note sequence generation procedure might require a few rounds of refreshing all clients except the host if performed over a network. The app is stable however connections can be prone to drop for various reasons (to be fixed).
 
 ___
 
