@@ -1,6 +1,6 @@
 ## A Live Performance Assistance Tool for Laptop Orchestras
 
-Rohan Proctor 2019. Created for my thesis at the Australian National University.
+Rohan Proctor 2019.
 
 ## Instructions for Use
 
@@ -16,7 +16,7 @@ From here you should have both a performer client running and the server listeni
 
 #### If you are running this on an single computer:
 
-Duplicate the client tab in your web browser and select a host by clicking the 'pick me as host' button in the top right of screen. Duplicate more performer client tabs to simulate additional performers in the ensemble.
+Duplicate the performer client tab in your web browser and select a host by clicking the 'pick me as host' button in the top right of screen. Duplicate more performer client tabs to simulate additional performers in the ensemble.
 
 #### If you are running this over a local area network:
 
