@@ -182,7 +182,6 @@ export class BasePage extends React.Component {
       }
     })
 
-    console.log(this.num);
     this.loadChordRNN();
 
     api.startPlaying((yesNo) => {
