@@ -2,6 +2,8 @@
 
 Rohan Proctor 2019.
 
+https://www.nime.org/proceedings/2020/nime2020_paper9.pdf
+
 https://github.com/rohan039/ensemble
 
 ## Instructions for Use
